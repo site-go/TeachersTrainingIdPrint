@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTECHLAB | ID Printing Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1; --primary-light: #eef2ff; --bg: #f8fafc; 
+            --card: #ffffff; --text-main: #1e293b; --text-dim: #64748b; --border: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: var(--bg); color: var(--text-main); padding: 20px; min-height: 100vh; }
+
+        .layout-wrapper { max-width: 1600px; margin: 0 auto; display: grid; grid-template-columns: 380px 1fr; gap: 25px; }
+
+        /* --- SIDEBAR PANEL --- */
+        .white-panel { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .panel-header { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--primary); margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+        
+        .upload-zone { border: 2px dashed var(--border); padding: 20px; border-radius: 16px; text-align: center; cursor: pointer; background: var(--bg); margin-bottom: 10px; }
+        .editor-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .control-item { display: flex; flex-direction: column; gap: 4px; }
+        .control-item label { font-size: 0.55rem; font-weight: 800; color: var(--text-dim); text-transform: uppercase; }
+        .control-item input { padding: 8px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.8rem; width: 100%; outline: none; }
+
+        /* Toggle Switch Styling */
+        .toggle-row { display: flex; align-items: center; gap: 10px; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border); }
+        .toggle-row input { width: 18px; height: 18px; cursor: pointer; }
+        .toggle-row label { font-size: 0.7rem; font-weight: 800; cursor: pointer; color: var(--text-main); }
+
+        /* --- UI ELEMENTS --- */
+        .batch-selector { display: flex; gap: 10px; background: #e2e8f0; padding: 5px; border-radius: 50px; width: fit-content; margin-bottom: 20px; }
+        .batch-pill { padding: 8px 20px; border-radius: 50px; border: none; font-weight: 800; font-size: 0.7rem; cursor: pointer; color: #64748b; background: transparent; }
+        .batch-pill.active { background: white; color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+
+        .data-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; }
+        .participant-card { background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 20px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .participant-card.selected { border-color: var(--primary); background: var(--primary-light); }
+
+        /* --- PRINT ENGINE (4 IDs per Letter Paper) --- */
+        #bulk-container { display: none; }
+        .paper { width: 21.59cm; height: 27.94cm; background: white; display: grid; grid-template-columns: 9.5cm 9.5cm; grid-template-rows: 13cm 13cm; gap: 5mm; padding: 1cm; box-sizing: border-box; justify-content: center; align-content: start; page-break-after: always; position: relative; }
+        .id-slot { width: 9.5cm; height: 13cm; border: 1px dashed #ccc; position: relative; background-size: 100% 100%; overflow: hidden; background-repeat: no-repeat; }
+        .print-text { position: absolute; transform: translate(-50%, -50%); text-align: center; white-space: pre-wrap; color: #000; }
+
+        @media print {
+            body { padding: 0; background: white !important; }
+            .layout-wrapper { display: none !important; }
+            #bulk-container { display: block !important; }
+            @page { size: letter portrait; margin: 0; }
+            .id-slot { border: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="layout-wrapper">
+        <div class="sidebar">
+            <div class="white-panel">
+                <div class="panel-header">🖼️ Template Asset</div>
+                <div class="upload-zone" onclick="document.getElementById('tplUpload').click()">
+                    <p id="tplStatus">Click to Upload Background</p>
+                    <input type="file" id="tplUpload" hidden accept="image/*" onchange="handleTemplate(this)">
+                </div>
+            </div>
+
+            <div class="white-panel">
+                <div class="panel-header">🎯 Name Layer</div>
+                <div class="editor-grid">
+                    <div class="control-item"><label>Top %</label><input type="number" id="nameTop" value="48" oninput="updateConfig()"></div>
+                    <div class="control-item"><label>Left %</label><input type="number" id="nameLeft" value="50" oninput="updateConfig()"></div>
+                    <div class="control-item"><label>Size px</label><input type="number" id="nameSize" value="28" oninput="updateConfig()"></div>
+                </div>
+            </div>
+
+            <div class="white-panel">
+                <div class="panel-header">🏷️ Workshop Layer</div>
+                <div class="editor-grid">
+                    <div class="control-item"><label>Top %</label><input type="number" id="wsTop" value="82" oninput="updateConfig()"></div>
+                    <div class="control-item"><label>Left %</label><input type="number" id="wsLeft" value="50" oninput="updateConfig()"></div>
+                    <div class="control-item"><label>Size px</label><input type="number" id="wsSize" value="12" oninput="updateConfig()"></div>
+                </div>
+                <div class="toggle-row">
+                    <input type="checkbox" id="showTopics" checked onchange="updateConfig()">
+                    <label for="showTopics">Show Topics on Print</label>
+                </div>
+            </div>
+
+            <button class="batch-pill" style="width:100%; background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca;" onclick="localStorage.clear(); location.reload();">Reset System</button>
+        </div>
+
+        <div class="main-view">
+            <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center;">
+                <div style="flex-grow: 1; background: white; border: 1px solid var(--border); padding: 12px 24px; border-radius: 50px; display: flex; align-items: center;">
+                    <input type="text" id="globalSearch" placeholder="Search teacher..." onkeyup="render()" style="width:100%; border:none; outline:none;">
+                </div>
+                <button class="batch-pill active" style="background: var(--primary); color:white; height:45px;" onclick="fetchLiveData()" id="syncBtn">🔄 SYNC DATA</button>
+                <button class="batch-pill active" style="background: #1e293b; color:white; height:45px;" onclick="printSelected()" id="printSelectedBtn">✅ PRINT (0)</button>
+            </div>
+
+            <div class="batch-selector">
+                <button class="batch-pill active" onclick="setFilterBatch('all', this)">ALL</button>
+                <button class="batch-pill" onclick="setFilterBatch('batch1', this)">BATCH 1</button>
+                <button class="batch-pill" onclick="setFilterBatch('batch2', this)">BATCH 2</button>
+                <button class="batch-pill" onclick="setFilterBatch('batch3', this)">BATCH 3</button>
+                <button class="batch-pill" onclick="setFilterBatch('batch4', this)">BATCH 4</button>
+                <button class="batch-pill" onclick="setFilterBatch('batch5', this)">BATCH 5</button>
+                <button class="batch-pill" onclick="setFilterBatch('batch6', this)">BATCH 6</button>
+            </div>
+
+            <div id="listContainer" class="data-grid"></div>
+        </div>
+    </div>
+
+    <div id="bulk-container"></div>
+
+    <script>
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJEJuWYBbbEtvlroXnqVtjt2V4Ev_F8iT4HR0Pi419O1xEgD4VDfFcyuaT1XiMmG6AZtX8yR5euWyc/pub?output=csv';
+
+        let allParticipants = [];
+        let selectedIds = new Set();
+        let backgroundData = '';
+        let filterBatch = 'all';
+
+        window.onload = () => {
+            const saved = JSON.parse(localStorage.getItem('idConfigV3'));
+            if (saved) {
+                Object.keys(saved).forEach(key => {
+                    const el = document.getElementById(key);
+                    if(el) {
+                        if(el.type === 'checkbox') el.checked = saved[key];
+                        else el.value = saved[key];
+                    }
+                });
+                backgroundData = saved.background || '';
+                if(backgroundData) document.getElementById('tplStatus').innerText = "✅ Template Loaded";
+            }
+            fetchLiveData();
+        };
+
+        async function fetchLiveData() {
+            const btn = document.getElementById('syncBtn');
+            btn.innerText = "⌛ SYNCING...";
+            try {
+                const response = await fetch(CSV_URL + '&t=' + Date.now());
+                const csvText = await response.text();
+                const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== "");
+                const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/"/g, ''));
+                
+                const nameIdx = headers.indexOf('fullname');
+                const batchIdx = headers.indexOf('schedule');
+                const workshopIdx = headers.indexOf('workshop');
+
+                allParticipants = lines.slice(1).map((line, index) => {
+                    const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, '').trim());
+                    return {
+                        uid: 'p_' + index,
+                        name: cols[nameIdx] || 'UNKNOWN',
+                        batch: (cols[batchIdx] || '').toLowerCase().replace(/\s/g, ''),
+                        workshop: cols[workshopIdx] || ''
+                    };
+                }).filter(p => p.name !== 'UNKNOWN');
+
+                render();
+                btn.innerText = "🔄 SYNC DONE";
+            } catch (err) { btn.innerText = "❌ ERROR"; }
+        }
+
+        function setFilterBatch(b, btn) {
+            filterBatch = b;
+            document.querySelectorAll('.batch-selector .batch-pill').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            render();
+        }
+
+        function handleTemplate(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    backgroundData = e.target.result;
+                    document.getElementById('tplStatus').innerText = "✅ Template Ready";
+                    updateConfig();
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function updateConfig() {
+            const config = {
+                nameTop: document.getElementById('nameTop').value,
+                nameLeft: document.getElementById('nameLeft').value,
+                nameSize: document.getElementById('nameSize').value,
+                wsTop: document.getElementById('wsTop').value,
+                wsLeft: document.getElementById('wsLeft').value,
+                wsSize: document.getElementById('wsSize').value,
+                showTopics: document.getElementById('showTopics').checked,
+                background: backgroundData
+            };
+            localStorage.setItem('idConfigV3', JSON.stringify(config));
+        }
+
+        function render() {
+            const q = document.getElementById('globalSearch').value.toUpperCase();
+            const container = document.getElementById('listContainer');
+            const filtered = allParticipants.filter(p => {
+                const nameMatch = p.name.includes(q);
+                const batchMatch = filterBatch === 'all' || p.batch === filterBatch;
+                return nameMatch && batchMatch;
+            });
+
+            container.innerHTML = filtered.map(p => `
+                <div class="participant-card ${selectedIds.has(p.uid) ? 'selected' : ''}" onclick="toggleSelect('${p.uid}')">
+                    <input type="checkbox" ${selectedIds.has(p.uid) ? 'checked' : ''} style="pointer-events: none;">
+                    <div class="p-info">
+                        <h4 style="font-size:0.75rem">${p.name}</h4>
+                        <p style="font-size:0.6rem">${p.batch.toUpperCase()}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleSelect(uid) {
+            if (selectedIds.has(uid)) selectedIds.delete(uid);
+            else selectedIds.add(uid);
+            document.getElementById('printSelectedBtn').innerText = `✅ PRINT (${selectedIds.size})`;
+            render();
+        }
+
+        function printSelected() {
+            if (!backgroundData) return alert("Upload background template!");
+            const toPrint = allParticipants.filter(p => selectedIds.has(p.uid));
+            if (!toPrint.length) return alert("Nothing selected.");
+            
+            const config = JSON.parse(localStorage.getItem('idConfigV3'));
+
+            let html = '';
+            for (let i = 0; i < toPrint.length; i += 4) {
+                html += `<div class="paper">`;
+                for (let j = 0; j < 4; j++) {
+                    const p = toPrint[i + j];
+                    if (p) {
+                        // Logic to optionally hide the workshop text
+                        const workshopText = config.showTopics ? p.workshop.split(', ').join('\n') : '';
+                        
+                        html += `
+                        <div class="id-slot" style="background-image: url('${backgroundData}')">
+                            <div class="print-text" style="top:${config.nameTop}%; left:${config.nameLeft}%; font-size:${config.nameSize}px; font-weight:800; width:90%;">${p.name}</div>
+                            <div class="print-text" style="top:${config.wsTop}%; left:${config.wsLeft}%; font-size:${config.wsSize}px; font-weight:600; width:85%; line-height:1.1;">${workshopText}</div>
+                        </div>`;
+                    }
+                }
+                html += `</div>`;
+            }
+            document.getElementById('bulk-container').innerHTML = html;
+            window.print();
+        }
+    </script>
+</body>
+</html>
