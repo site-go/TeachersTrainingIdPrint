@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iTECHLAB | ID Printing Terminal</title>
+    <title>Teachers Training 2026 | ID Printing Terminal v4.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -17,34 +17,35 @@
         .layout-wrapper { max-width: 1600px; margin: 0 auto; display: grid; grid-template-columns: 380px 1fr; gap: 25px; }
 
         /* --- SIDEBAR PANEL --- */
-        .white-panel { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-        .panel-header { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--primary); margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+        .white-panel { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .panel-header { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--primary); margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
         
-        .upload-zone { border: 2px dashed var(--border); padding: 20px; border-radius: 16px; text-align: center; cursor: pointer; background: var(--bg); margin-bottom: 10px; }
-        .editor-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .upload-zone { border: 2px dashed var(--border); padding: 15px; border-radius: 16px; text-align: center; cursor: pointer; background: var(--bg); margin-bottom: 5px; font-size: 0.8rem; }
+        .editor-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .control-item { display: flex; flex-direction: column; gap: 4px; }
         .control-item label { font-size: 0.55rem; font-weight: 800; color: var(--text-dim); text-transform: uppercase; }
-        .control-item input { padding: 8px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.8rem; width: 100%; outline: none; }
+        .control-item input { padding: 6px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.75rem; width: 100%; outline: none; text-align: center; }
 
-        /* Toggle Switch Styling */
-        .toggle-row { display: flex; align-items: center; gap: 10px; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border); }
-        .toggle-row input { width: 18px; height: 18px; cursor: pointer; }
-        .toggle-row label { font-size: 0.7rem; font-weight: 800; cursor: pointer; color: var(--text-main); }
+        .toggle-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+        .toggle-row input { width: 16px; height: 16px; cursor: pointer; }
+        .toggle-row label { font-size: 0.65rem; font-weight: 800; cursor: pointer; }
 
         /* --- UI ELEMENTS --- */
-        .batch-selector { display: flex; gap: 10px; background: #e2e8f0; padding: 5px; border-radius: 50px; width: fit-content; margin-bottom: 20px; }
-        .batch-pill { padding: 8px 20px; border-radius: 50px; border: none; font-weight: 800; font-size: 0.7rem; cursor: pointer; color: #64748b; background: transparent; }
+        .batch-selector { display: flex; gap: 8px; background: #e2e8f0; padding: 5px; border-radius: 50px; width: fit-content; margin-bottom: 20px; }
+        .batch-pill { padding: 8px 18px; border-radius: 50px; border: none; font-weight: 800; font-size: 0.65rem; cursor: pointer; color: #64748b; background: transparent; }
         .batch-pill.active { background: white; color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
 
-        .data-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; }
-        .participant-card { background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 20px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .data-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+        .participant-card { background: var(--card); border: 1px solid var(--border); padding: 12px; border-radius: 18px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; }
         .participant-card.selected { border-color: var(--primary); background: var(--primary-light); }
+        .p-info h4 { font-size: 0.75rem; text-transform: uppercase; margin-bottom: 2px; }
+        .p-info p { font-size: 0.6rem; color: var(--text-dim); margin-bottom: 1px; }
 
-        /* --- PRINT ENGINE (4 IDs per Letter Paper) --- */
+        /* --- PRINT ENGINE --- */
         #bulk-container { display: none; }
         .paper { width: 21.59cm; height: 27.94cm; background: white; display: grid; grid-template-columns: 9.5cm 9.5cm; grid-template-rows: 13cm 13cm; gap: 5mm; padding: 1cm; box-sizing: border-box; justify-content: center; align-content: start; page-break-after: always; position: relative; }
         .id-slot { width: 9.5cm; height: 13cm; border: 1px dashed #ccc; position: relative; background-size: 100% 100%; overflow: hidden; background-repeat: no-repeat; }
-        .print-text { position: absolute; transform: translate(-50%, -50%); text-align: center; white-space: pre-wrap; color: #000; }
+        .print-text { position: absolute; transform: translate(-50%, -50%); text-align: center; white-space: pre-wrap; color: #000; width: 90%; }
 
         @media print {
             body { padding: 0; background: white !important; }
@@ -62,7 +63,7 @@
             <div class="white-panel">
                 <div class="panel-header">🖼️ Template Asset</div>
                 <div class="upload-zone" onclick="document.getElementById('tplUpload').click()">
-                    <p id="tplStatus">Click to Upload Background</p>
+                    <p id="tplStatus">Upload Background Template</p>
                     <input type="file" id="tplUpload" hidden accept="image/*" onchange="handleTemplate(this)">
                 </div>
             </div>
@@ -77,28 +78,41 @@
             </div>
 
             <div class="white-panel">
-                <div class="panel-header">🏷️ Workshop Layer</div>
+                <div class="panel-header">🏢 Institution Layer</div>
                 <div class="editor-grid">
-                    <div class="control-item"><label>Top %</label><input type="number" id="wsTop" value="82" oninput="updateConfig()"></div>
-                    <div class="control-item"><label>Left %</label><input type="number" id="wsLeft" value="50" oninput="updateConfig()"></div>
-                    <div class="control-item"><label>Size px</label><input type="number" id="wsSize" value="12" oninput="updateConfig()"></div>
+                    <div class="control-item"><label>Top %</label><input type="number" id="instTop" value="55" oninput="updateConfig()"></div>
+                    <div class="control-item"><label>Left %</label><input type="number" id="instLeft" value="50" oninput="updateConfig()"></div>
+                    <div class="control-item"><label>Size px</label><input type="number" id="instSize" value="14" oninput="updateConfig()"></div>
                 </div>
                 <div class="toggle-row">
-                    <input type="checkbox" id="showTopics" checked onchange="updateConfig()">
-                    <label for="showTopics">Show Topics on Print</label>
+                    <input type="checkbox" id="showInst" checked onchange="updateConfig()">
+                    <label for="showInst">Print Institution</label>
                 </div>
             </div>
 
-            <button class="batch-pill" style="width:100%; background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca;" onclick="localStorage.clear(); location.reload();">Reset System</button>
+            <div class="white-panel">
+                <div class="panel-header">👤 Position Layer (Col L)</div>
+                <div class="editor-grid">
+                    <div class="control-item"><label>Top %</label><input type="number" id="posTop" value="62" oninput="updateConfig()"></div>
+                    <div class="control-item"><label>Left %</label><input type="number" id="posLeft" value="50" oninput="updateConfig()"></div>
+                    <div class="control-item"><label>Size px</label><input type="number" id="posSize" value="12" oninput="updateConfig()"></div>
+                </div>
+                <div class="toggle-row">
+                    <input type="checkbox" id="showPos" onchange="updateConfig()">
+                    <label for="showPos">Print Position (L)</label>
+                </div>
+            </div>
+
+            <button class="batch-pill" style="width:100%; background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca;" onclick="localStorage.clear(); location.reload();">Reset Settings</button>
         </div>
 
         <div class="main-view">
             <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center;">
-                <div style="flex-grow: 1; background: white; border: 1px solid var(--border); padding: 12px 24px; border-radius: 50px; display: flex; align-items: center;">
-                    <input type="text" id="globalSearch" placeholder="Search teacher..." onkeyup="render()" style="width:100%; border:none; outline:none;">
+                <div style="flex-grow: 1; background: white; border: 1px solid var(--border); padding: 10px 20px; border-radius: 50px; display: flex; align-items: center;">
+                    <input type="text" id="globalSearch" placeholder="Search name, school, or position..." onkeyup="render()" style="width:100%; border:none; outline:none; font-size: 0.9rem;">
                 </div>
-                <button class="batch-pill active" style="background: var(--primary); color:white; height:45px;" onclick="fetchLiveData()" id="syncBtn">🔄 SYNC DATA</button>
-                <button class="batch-pill active" style="background: #1e293b; color:white; height:45px;" onclick="printSelected()" id="printSelectedBtn">✅ PRINT (0)</button>
+                <button class="batch-pill active" style="background: var(--primary); color:white; height:42px;" onclick="fetchLiveData()" id="syncBtn">🔄 SYNC DATA</button>
+                <button class="batch-pill active" style="background: #1e293b; color:white; height:42px;" onclick="printSelected()" id="printSelectedBtn">✅ PRINT (0)</button>
             </div>
 
             <div class="batch-selector">
@@ -106,9 +120,6 @@
                 <button class="batch-pill" onclick="setFilterBatch('batch1', this)">BATCH 1</button>
                 <button class="batch-pill" onclick="setFilterBatch('batch2', this)">BATCH 2</button>
                 <button class="batch-pill" onclick="setFilterBatch('batch3', this)">BATCH 3</button>
-                <button class="batch-pill" onclick="setFilterBatch('batch4', this)">BATCH 4</button>
-                <button class="batch-pill" onclick="setFilterBatch('batch5', this)">BATCH 5</button>
-                <button class="batch-pill" onclick="setFilterBatch('batch6', this)">BATCH 6</button>
             </div>
 
             <div id="listContainer" class="data-grid"></div>
@@ -126,7 +137,7 @@
         let filterBatch = 'all';
 
         window.onload = () => {
-            const saved = JSON.parse(localStorage.getItem('idConfigV3'));
+            const saved = JSON.parse(localStorage.getItem('idTerminalV4_1'));
             if (saved) {
                 Object.keys(saved).forEach(key => {
                     const el = document.getElementById(key);
@@ -143,16 +154,18 @@
 
         async function fetchLiveData() {
             const btn = document.getElementById('syncBtn');
-            btn.innerText = "⌛ SYNCING...";
+            btn.innerText = "⌛...";
             try {
                 const response = await fetch(CSV_URL + '&t=' + Date.now());
                 const csvText = await response.text();
                 const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== "");
                 const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/"/g, ''));
                 
+                // Mappings
                 const nameIdx = headers.indexOf('fullname');
                 const batchIdx = headers.indexOf('schedule');
-                const workshopIdx = headers.indexOf('workshop');
+                const instIdx = headers.indexOf('institution');
+                const posIdx = headers.indexOf('position'); // Column L data
 
                 allParticipants = lines.slice(1).map((line, index) => {
                     const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, '').trim());
@@ -160,7 +173,8 @@
                         uid: 'p_' + index,
                         name: cols[nameIdx] || 'UNKNOWN',
                         batch: (cols[batchIdx] || '').toLowerCase().replace(/\s/g, ''),
-                        workshop: cols[workshopIdx] || ''
+                        institution: cols[instIdx] || 'No School',
+                        position: cols[posIdx] || 'No Position' // Column L
                     };
                 }).filter(p => p.name !== 'UNKNOWN');
 
@@ -181,7 +195,7 @@
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     backgroundData = e.target.result;
-                    document.getElementById('tplStatus').innerText = "✅ Template Ready";
+                    document.getElementById('tplStatus').innerText = "✅ Ready";
                     updateConfig();
                 };
                 reader.readAsDataURL(input.files[0]);
@@ -193,30 +207,35 @@
                 nameTop: document.getElementById('nameTop').value,
                 nameLeft: document.getElementById('nameLeft').value,
                 nameSize: document.getElementById('nameSize').value,
-                wsTop: document.getElementById('wsTop').value,
-                wsLeft: document.getElementById('wsLeft').value,
-                wsSize: document.getElementById('wsSize').value,
-                showTopics: document.getElementById('showTopics').checked,
+                instTop: document.getElementById('instTop').value,
+                instLeft: document.getElementById('instLeft').value,
+                instSize: document.getElementById('instSize').value,
+                posTop: document.getElementById('posTop').value,
+                posLeft: document.getElementById('posLeft').value,
+                posSize: document.getElementById('posSize').value,
+                showInst: document.getElementById('showInst').checked,
+                showPos: document.getElementById('showPos').checked,
                 background: backgroundData
             };
-            localStorage.setItem('idConfigV3', JSON.stringify(config));
+            localStorage.setItem('idTerminalV4_1', JSON.stringify(config));
         }
 
         function render() {
             const q = document.getElementById('globalSearch').value.toUpperCase();
             const container = document.getElementById('listContainer');
             const filtered = allParticipants.filter(p => {
-                const nameMatch = p.name.includes(q);
+                const searchTxt = `${p.name} ${p.institution} ${p.position}`.toUpperCase();
                 const batchMatch = filterBatch === 'all' || p.batch === filterBatch;
-                return nameMatch && batchMatch;
+                return searchTxt.includes(q) && batchMatch;
             });
 
             container.innerHTML = filtered.map(p => `
                 <div class="participant-card ${selectedIds.has(p.uid) ? 'selected' : ''}" onclick="toggleSelect('${p.uid}')">
                     <input type="checkbox" ${selectedIds.has(p.uid) ? 'checked' : ''} style="pointer-events: none;">
                     <div class="p-info">
-                        <h4 style="font-size:0.75rem">${p.name}</h4>
-                        <p style="font-size:0.6rem">${p.batch.toUpperCase()}</p>
+                        <h4>${p.name}</h4>
+                        <p>${p.institution} • <b>${p.position}</b></p>
+                        <p style="font-weight: 800; color: var(--primary);">${p.batch.toUpperCase()}</p>
                     </div>
                 </div>
             `).join('');
@@ -230,11 +249,11 @@
         }
 
         function printSelected() {
-            if (!backgroundData) return alert("Upload background template!");
+            if (!backgroundData) return alert("Upload template first!");
             const toPrint = allParticipants.filter(p => selectedIds.has(p.uid));
-            if (!toPrint.length) return alert("Nothing selected.");
+            if (!toPrint.length) return alert("Select someone to print.");
             
-            const config = JSON.parse(localStorage.getItem('idConfigV3'));
+            const config = JSON.parse(localStorage.getItem('idTerminalV4_1'));
 
             let html = '';
             for (let i = 0; i < toPrint.length; i += 4) {
@@ -242,13 +261,14 @@
                 for (let j = 0; j < 4; j++) {
                     const p = toPrint[i + j];
                     if (p) {
-                        // Logic to optionally hide the workshop text
-                        const workshopText = config.showTopics ? p.workshop.split(', ').join('\n') : '';
+                        const instText = config.showInst ? p.institution : '';
+                        const posText = config.showPos ? p.position : '';
                         
                         html += `
                         <div class="id-slot" style="background-image: url('${backgroundData}')">
-                            <div class="print-text" style="top:${config.nameTop}%; left:${config.nameLeft}%; font-size:${config.nameSize}px; font-weight:800; width:90%;">${p.name}</div>
-                            <div class="print-text" style="top:${config.wsTop}%; left:${config.wsLeft}%; font-size:${config.wsSize}px; font-weight:600; width:85%; line-height:1.1;">${workshopText}</div>
+                            <div class="print-text" style="top:${config.nameTop}%; left:${config.nameLeft}%; font-size:${config.nameSize}px; font-weight:800;">${p.name}</div>
+                            <div class="print-text" style="top:${config.instTop}%; left:${config.instLeft}%; font-size:${config.instSize}px; font-weight:600; color:#334155;">${instText}</div>
+                            <div class="print-text" style="top:${config.posTop}%; left:${config.posLeft}%; font-size:${config.posSize}px; font-weight:600; color:#555;">${posText}</div>
                         </div>`;
                     }
                 }
