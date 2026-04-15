@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teachers Training 2026 | ID Printing Terminal v4.1</title>
+    <title>Teachers Training 2026 | ID Terminal v4.5</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #6366f1; --primary-light: #eef2ff; --bg: #f8fafc; 
             --card: #ffffff; --text-main: #1e293b; --text-dim: #64748b; --border: #e2e8f0;
+            --panay: #0ea5e9; --mindanao: #f59e0b;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -26,25 +27,31 @@
         .control-item label { font-size: 0.55rem; font-weight: 800; color: var(--text-dim); text-transform: uppercase; }
         .control-item input { padding: 6px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.75rem; width: 100%; outline: none; text-align: center; }
 
-        .toggle-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
-        .toggle-row input { width: 16px; height: 16px; cursor: pointer; }
-        .toggle-row label { font-size: 0.65rem; font-weight: 800; cursor: pointer; }
-
         /* --- UI ELEMENTS --- */
-        .batch-selector { display: flex; gap: 8px; background: #e2e8f0; padding: 5px; border-radius: 50px; width: fit-content; margin-bottom: 20px; }
-        .batch-pill { padding: 8px 18px; border-radius: 50px; border: none; font-weight: 800; font-size: 0.65rem; cursor: pointer; color: #64748b; background: transparent; }
+        .stats-row { display: flex; gap: 10px; margin-bottom: 15px; }
+        .stat-card { flex: 1; background: white; padding: 12px; border-radius: 16px; border: 1px solid var(--border); text-align: center; }
+        .stat-card small { font-size: 0.6rem; font-weight: 800; color: var(--text-dim); text-transform: uppercase; }
+        .stat-card h3 { font-size: 1.2rem; color: var(--text-main); }
+
+        .batch-selector-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        .batch-selector { display: flex; gap: 8px; background: #e2e8f0; padding: 5px; border-radius: 50px; width: fit-content; }
+        .batch-pill { padding: 8px 18px; border-radius: 50px; border: none; font-weight: 800; font-size: 0.65rem; cursor: pointer; color: #64748b; background: transparent; transition: 0.2s; }
         .batch-pill.active { background: white; color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
 
         .data-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
-        .participant-card { background: var(--card); border: 1px solid var(--border); padding: 12px; border-radius: 18px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; }
+        .participant-card { background: var(--card); border: 1px solid var(--border); padding: 12px; border-radius: 18px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; position: relative; overflow: hidden; }
         .participant-card.selected { border-color: var(--primary); background: var(--primary-light); }
+        
+        .cluster-tag { position: absolute; right: 0; top: 0; padding: 4px 10px; font-size: 0.5rem; font-weight: 900; color: white; border-bottom-left-radius: 10px; text-transform: uppercase; }
+        .tag-panay { background: var(--panay); }
+        .tag-mindanao { background: var(--mindanao); }
+
         .p-info h4 { font-size: 0.75rem; text-transform: uppercase; margin-bottom: 2px; }
         .p-info p { font-size: 0.6rem; color: var(--text-dim); margin-bottom: 1px; }
 
-        /* --- PRINT ENGINE --- */
         #bulk-container { display: none; }
-        .paper { width: 21.59cm; height: 27.94cm; background: white; display: grid; grid-template-columns: 9.5cm 9.5cm; grid-template-rows: 13cm 13cm; gap: 5mm; padding: 1cm; box-sizing: border-box; justify-content: center; align-content: start; page-break-after: always; position: relative; }
-        .id-slot { width: 9.5cm; height: 13cm; border: 1px dashed #ccc; position: relative; background-size: 100% 100%; overflow: hidden; background-repeat: no-repeat; }
+        .paper { width: 21.59cm; height: 27.94cm; background: white; display: grid; grid-template-columns: 9.5cm 9.5cm; grid-template-rows: 13cm 13cm; gap: 5mm; padding: 1cm; box-sizing: border-box; justify-content: center; align-content: start; page-break-after: always; }
+        .id-slot { width: 9.5cm; height: 13cm; border: 1px dashed #ccc; position: relative; background-size: 100% 100%; overflow: hidden; }
         .print-text { position: absolute; transform: translate(-50%, -50%); text-align: center; white-space: pre-wrap; color: #000; width: 90%; }
 
         @media print {
@@ -52,7 +59,6 @@
             .layout-wrapper { display: none !important; }
             #bulk-container { display: block !important; }
             @page { size: letter portrait; margin: 0; }
-            .id-slot { border: none; }
         }
     </style>
 </head>
@@ -67,62 +73,48 @@
                     <input type="file" id="tplUpload" hidden accept="image/*" onchange="handleTemplate(this)">
                 </div>
             </div>
-
             <div class="white-panel">
-                <div class="panel-header">🎯 Name Layer</div>
+                <div class="panel-header">🎯 Layers Configuration</div>
                 <div class="editor-grid">
-                    <div class="control-item"><label>Top %</label><input type="number" id="nameTop" value="48" oninput="updateConfig()"></div>
-                    <div class="control-item"><label>Left %</label><input type="number" id="nameLeft" value="50" oninput="updateConfig()"></div>
+                    <div class="control-item"><label>Name T%</label><input type="number" id="nameTop" value="48" oninput="updateConfig()"></div>
+                    <div class="control-item"><label>Inst T%</label><input type="number" id="instTop" value="55" oninput="updateConfig()"></div>
                     <div class="control-item"><label>Size px</label><input type="number" id="nameSize" value="28" oninput="updateConfig()"></div>
                 </div>
             </div>
-
-            <div class="white-panel">
-                <div class="panel-header">🏢 Institution Layer</div>
-                <div class="editor-grid">
-                    <div class="control-item"><label>Top %</label><input type="number" id="instTop" value="55" oninput="updateConfig()"></div>
-                    <div class="control-item"><label>Left %</label><input type="number" id="instLeft" value="50" oninput="updateConfig()"></div>
-                    <div class="control-item"><label>Size px</label><input type="number" id="instSize" value="14" oninput="updateConfig()"></div>
-                </div>
-                <div class="toggle-row">
-                    <input type="checkbox" id="showInst" checked onchange="updateConfig()">
-                    <label for="showInst">Print Institution</label>
-                </div>
-            </div>
-
-            <div class="white-panel">
-                <div class="panel-header">👤 Position Layer (Col L)</div>
-                <div class="editor-grid">
-                    <div class="control-item"><label>Top %</label><input type="number" id="posTop" value="62" oninput="updateConfig()"></div>
-                    <div class="control-item"><label>Left %</label><input type="number" id="posLeft" value="50" oninput="updateConfig()"></div>
-                    <div class="control-item"><label>Size px</label><input type="number" id="posSize" value="12" oninput="updateConfig()"></div>
-                </div>
-                <div class="toggle-row">
-                    <input type="checkbox" id="showPos" onchange="updateConfig()">
-                    <label for="showPos">Print Position (L)</label>
-                </div>
-            </div>
-
-            <button class="batch-pill" style="width:100%; background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca;" onclick="localStorage.clear(); location.reload();">Reset Settings</button>
+            <button class="batch-pill" style="width:100%; background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca;" onclick="localStorage.clear(); location.reload();">Reset Terminal</button>
         </div>
 
         <div class="main-view">
+            <div class="stats-row">
+                <div class="stat-card" style="border-left: 4px solid var(--primary);"><small>ORIGINAL</small><h3 id="countOriginal">0</h3></div>
+                <div class="stat-card" style="border-left: 4px solid var(--panay);"><small>PANAY</small><h3 id="countPanay">0</h3></div>
+                <div class="stat-card" style="border-left: 4px solid var(--mindanao);"><small>MINDANAO</small><h3 id="countMindanao">0</h3></div>
+            </div>
+
             <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center;">
                 <div style="flex-grow: 1; background: white; border: 1px solid var(--border); padding: 10px 20px; border-radius: 50px; display: flex; align-items: center;">
-                    <input type="text" id="globalSearch" placeholder="Search name, school, or position..." onkeyup="render()" style="width:100%; border:none; outline:none; font-size: 0.9rem;">
+                    <input type="text" id="globalSearch" placeholder="Search name or school..." onkeyup="render()" style="width:100%; border:none; outline:none; font-size: 0.9rem;">
                 </div>
-                <button class="batch-pill active" style="background: var(--primary); color:white; height:42px;" onclick="fetchLiveData()" id="syncBtn">🔄 SYNC DATA</button>
+                <button class="batch-pill active" style="background: var(--primary); color:white; height:42px;" onclick="fetchLiveData()" id="syncBtn">🔄 SYNC ALL</button>
                 <button class="batch-pill active" style="background: #1e293b; color:white; height:42px;" onclick="printSelected()" id="printSelectedBtn">✅ PRINT (0)</button>
             </div>
 
-            <div class="batch-selector">
-                <button class="batch-pill active" onclick="setFilterBatch('all', this)">ALL</button>
-                <button class="batch-pill" onclick="setFilterBatch('batch1', this)">BATCH 1</button>
-                <button class="batch-pill" onclick="setFilterBatch('batch2', this)">BATCH 2</button>
-                <button class="batch-pill" onclick="setFilterBatch('batch3', this)">BATCH 3</button>
-                <button class="batch-pill" onclick="setFilterBatch('batch3', this)">BATCH 4</button>
-                <button class="batch-pill" onclick="setFilterBatch('batch3', this)">BATCH 5</button>
-                <button class="batch-pill" onclick="setFilterBatch('batch3', this)">BATCH 6</button>
+            <div class="batch-selector-container">
+                <div class="batch-selector" id="clusterSelector">
+                    <button class="batch-pill active" onclick="setFilterCluster('original', this)">ORIGINAL DATA</button>
+                    <button class="batch-pill" onclick="setFilterCluster('panay', this)">PANAY CLUSTER</button>
+                    <button class="batch-pill" onclick="setFilterCluster('mindanao', this)">MINDANAO CLUSTER</button>
+                </div>
+
+                <div class="batch-selector" id="batchSelector">
+                    <button class="batch-pill active" onclick="setFilterBatch('all', this)">ALL BATCHES</button>
+                    <button class="batch-pill" onclick="setFilterBatch('batch1', this)">B1</button>
+                    <button class="batch-pill" onclick="setFilterBatch('batch2', this)">B2</button>
+                    <button class="batch-pill" onclick="setFilterBatch('batch3', this)">B3</button>
+                    <button class="batch-pill" onclick="setFilterBatch('batch4', this)">B4</button>
+                    <button class="batch-pill" onclick="setFilterBatch('batch5', this)">B5</button>
+                    <button class="batch-pill" onclick="setFilterBatch('batch6', this)">B6</button>
+                </div>
             </div>
 
             <div id="listContainer" class="data-grid"></div>
@@ -132,113 +124,115 @@
     <div id="bulk-container"></div>
 
     <script>
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJEJuWYBbbEtvlroXnqVtjt2V4Ev_F8iT4HR0Pi419O1xEgD4VDfFcyuaT1XiMmG6AZtX8yR5euWyc/pub?output=csv';
+        const URLS = {
+            panay: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSNs_RBN6sLDKG1GdPw-zAUBQc94_EVztntR4kWCmkebFUATHQalopVuzhlEBCBeJ0nNki8zn75pPTU/pub?output=csv',
+            mindanao: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vROJBuC8QcVYdbkOWg7UlUhVAgnFOSa9i7p7HRGgABYIPdsxw31MEx0fzBrkH5I1_k2-mSDf6Y2itVJ/pub?output=csv',
+            original: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJEJuWYBbbEtvlroXnqVtjt2V4Ev_F8iT4HR0Pi419O1xEgD4VDfFcyuaT1XiMmG6AZtX8yR5euWyc/pub?output=csv'
+        };
 
-        let allParticipants = [];
+        let datasets = { original: [], panay: [], mindanao: [] };
         let selectedIds = new Set();
         let backgroundData = '';
-        let filterBatch = 'all';
+        let currentView = 'original';
+        let currentBatch = 'all';
 
         window.onload = () => {
-            const saved = JSON.parse(localStorage.getItem('idTerminalV4_1'));
+            const saved = JSON.parse(localStorage.getItem('idTerminalV4_5'));
             if (saved) {
-                Object.keys(saved).forEach(key => {
-                    const el = document.getElementById(key);
-                    if(el) {
-                        if(el.type === 'checkbox') el.checked = saved[key];
-                        else el.value = saved[key];
-                    }
-                });
+                document.getElementById('nameTop').value = saved.nameTop || 48;
+                document.getElementById('instTop').value = saved.instTop || 55;
+                document.getElementById('nameSize').value = saved.nameSize || 28;
                 backgroundData = saved.background || '';
-                if(backgroundData) document.getElementById('tplStatus').innerText = "✅ Template Loaded";
             }
             fetchLiveData();
         };
+
+        async function parseCSV(url, clusterName) {
+            const res = await fetch(url + '&t=' + Date.now());
+            const text = await res.text();
+            const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
+            const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/"/g, ''));
+            
+            const nameIdx = headers.indexOf('fullname');
+            const instIdx = headers.indexOf('institution');
+            const batchIdx = headers.indexOf('schedule'); // Look for batch info
+
+            return lines.slice(1).map((line, idx) => {
+                const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, '').trim());
+                return {
+                    uid: clusterName + '_' + idx,
+                    name: cols[nameIdx] || 'UNKNOWN',
+                    institution: cols[instIdx] || 'No School',
+                    batch: (cols[batchIdx] || '').toLowerCase().replace(/\s/g, ''),
+                    cluster: clusterName
+                };
+            }).filter(p => p.name !== 'UNKNOWN');
+        }
 
         async function fetchLiveData() {
             const btn = document.getElementById('syncBtn');
             btn.innerText = "⌛...";
             try {
-                const response = await fetch(CSV_URL + '&t=' + Date.now());
-                const csvText = await response.text();
-                const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== "");
-                const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/"/g, ''));
-                
-                // Mappings
-                const nameIdx = headers.indexOf('fullname');
-                const batchIdx = headers.indexOf('schedule');
-                const instIdx = headers.indexOf('institution');
-                const posIdx = headers.indexOf('position'); // Column L data
+                const [orig, pan, min] = await Promise.all([
+                    parseCSV(URLS.original, 'original'),
+                    parseCSV(URLS.panay, 'panay'),
+                    parseCSV(URLS.mindanao, 'mindanao')
+                ]);
 
-                allParticipants = lines.slice(1).map((line, index) => {
-                    const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, '').trim());
-                    return {
-                        uid: 'p_' + index,
-                        name: cols[nameIdx] || 'UNKNOWN',
-                        batch: (cols[batchIdx] || '').toLowerCase().replace(/\s/g, ''),
-                        institution: cols[instIdx] || 'No School',
-                        position: cols[posIdx] || 'No Position' // Column L
-                    };
-                }).filter(p => p.name !== 'UNKNOWN');
+                datasets.original = orig;
+                datasets.panay = pan;
+                datasets.mindanao = min;
 
+                updateStats();
                 render();
-                btn.innerText = "🔄 SYNC DONE";
-            } catch (err) { btn.innerText = "❌ ERROR"; }
+                btn.innerText = "🔄 SYNC ALL";
+            } catch (err) { btn.innerText = "❌ SYNC ERROR"; }
         }
 
-        function setFilterBatch(b, btn) {
-            filterBatch = b;
-            document.querySelectorAll('.batch-selector .batch-pill').forEach(p => p.classList.remove('active'));
+        function updateStats() {
+            document.getElementById('countOriginal').innerText = datasets.original.length;
+            document.getElementById('countPanay').innerText = datasets.panay.length;
+            document.getElementById('countMindanao').innerText = datasets.mindanao.length;
+        }
+
+        function setFilterCluster(view, btn) {
+            currentView = view;
+            document.querySelectorAll('#clusterSelector .batch-pill').forEach(p => p.classList.remove('active'));
             btn.classList.add('active');
+            
+            // Toggle batch visibility - usually Batch is only needed for the Original list
+            const batchBar = document.getElementById('batchSelector');
+            batchBar.style.display = (view === 'original') ? 'flex' : 'none';
+            
             render();
         }
 
-        function handleTemplate(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    backgroundData = e.target.result;
-                    document.getElementById('tplStatus').innerText = "✅ Ready";
-                    updateConfig();
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        function updateConfig() {
-            const config = {
-                nameTop: document.getElementById('nameTop').value,
-                nameLeft: document.getElementById('nameLeft').value,
-                nameSize: document.getElementById('nameSize').value,
-                instTop: document.getElementById('instTop').value,
-                instLeft: document.getElementById('instLeft').value,
-                instSize: document.getElementById('instSize').value,
-                posTop: document.getElementById('posTop').value,
-                posLeft: document.getElementById('posLeft').value,
-                posSize: document.getElementById('posSize').value,
-                showInst: document.getElementById('showInst').checked,
-                showPos: document.getElementById('showPos').checked,
-                background: backgroundData
-            };
-            localStorage.setItem('idTerminalV4_1', JSON.stringify(config));
+        function setFilterBatch(batch, btn) {
+            currentBatch = batch;
+            document.querySelectorAll('#batchSelector .batch-pill').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            render();
         }
 
         function render() {
             const q = document.getElementById('globalSearch').value.toUpperCase();
             const container = document.getElementById('listContainer');
-            const filtered = allParticipants.filter(p => {
-                const searchTxt = `${p.name} ${p.institution} ${p.position}`.toUpperCase();
-                const batchMatch = filterBatch === 'all' || p.batch === filterBatch;
-                return searchTxt.includes(q) && batchMatch;
+            const activeData = datasets[currentView];
+
+            const filtered = activeData.filter(p => {
+                const searchTxt = `${p.name} ${p.institution}`.toUpperCase();
+                const searchMatch = searchTxt.includes(q);
+                const batchMatch = (currentView !== 'original' || currentBatch === 'all' || p.batch === currentBatch);
+                return searchMatch && batchMatch;
             });
 
             container.innerHTML = filtered.map(p => `
                 <div class="participant-card ${selectedIds.has(p.uid) ? 'selected' : ''}" onclick="toggleSelect('${p.uid}')">
-                    <input type="checkbox" ${selectedIds.has(p.uid) ? 'checked' : ''} style="pointer-events: none;">
+                    <div class="cluster-tag ${p.cluster === 'panay' ? 'tag-panay' : (p.cluster === 'mindanao' ? 'tag-mindanao' : '')}">${p.cluster === 'original' ? '' : p.cluster}</div>
                     <div class="p-info">
                         <h4>${p.name}</h4>
-                        <p>${p.institution} • <b>${p.position}</b></p>
-                        <p style="font-weight: 800; color: var(--primary);">${p.batch.toUpperCase()}</p>
+                        <p>${p.institution}</p>
+                        ${p.batch ? `<p style="font-size:0.55rem; color:var(--primary); font-weight:800;">${p.batch.toUpperCase()}</p>` : ''}
                     </div>
                 </div>
             `).join('');
@@ -251,27 +245,45 @@
             render();
         }
 
-        function printSelected() {
-            if (!backgroundData) return alert("Upload template first!");
-            const toPrint = allParticipants.filter(p => selectedIds.has(p.uid));
-            if (!toPrint.length) return alert("Select someone to print.");
-            
-            const config = JSON.parse(localStorage.getItem('idTerminalV4_1'));
+        function handleTemplate(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    backgroundData = e.target.result;
+                    document.getElementById('tplStatus').innerText = "✅ Template Loaded";
+                    updateConfig();
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
 
+        function updateConfig() {
+            const config = {
+                nameTop: document.getElementById('nameTop').value,
+                instTop: document.getElementById('instTop').value,
+                nameSize: document.getElementById('nameSize').value,
+                background: backgroundData
+            };
+            localStorage.setItem('idTerminalV4_5', JSON.stringify(config));
+        }
+
+        function printSelected() {
+            if (!backgroundData) return alert("Upload background template!");
+            const allSource = [...datasets.original, ...datasets.panay, ...datasets.mindanao];
+            const toPrint = allSource.filter(p => selectedIds.has(p.uid));
+            if (!toPrint.length) return alert("Select participants first.");
+            
+            const config = JSON.parse(localStorage.getItem('idTerminalV4_5'));
             let html = '';
             for (let i = 0; i < toPrint.length; i += 4) {
                 html += `<div class="paper">`;
                 for (let j = 0; j < 4; j++) {
                     const p = toPrint[i + j];
                     if (p) {
-                        const instText = config.showInst ? p.institution : '';
-                        const posText = config.showPos ? p.position : '';
-                        
                         html += `
                         <div class="id-slot" style="background-image: url('${backgroundData}')">
-                            <div class="print-text" style="top:${config.nameTop}%; left:${config.nameLeft}%; font-size:${config.nameSize}px; font-weight:800;">${p.name}</div>
-                            <div class="print-text" style="top:${config.instTop}%; left:${config.instLeft}%; font-size:${config.instSize}px; font-weight:600; color:#334155;">${instText}</div>
-                            <div class="print-text" style="top:${config.posTop}%; left:${config.posLeft}%; font-size:${config.posSize}px; font-weight:600; color:#555;">${posText}</div>
+                            <div class="print-text" style="top:${config.nameTop}%; left:50%; font-size:${config.nameSize}px; font-weight:800;">${p.name}</div>
+                            <div class="print-text" style="top:${config.instTop}%; left:50%; font-size:14px; font-weight:600; color:#334155;">${p.institution}</div>
                         </div>`;
                     }
                 }
