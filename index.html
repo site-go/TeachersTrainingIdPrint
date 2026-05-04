@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teachers Training 2026 | ID Printing & QR Terminal v5.0</title>
+    <title>Teachers Training 2026 | Multi-Cluster ID Terminal v5.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
@@ -11,6 +11,7 @@
         :root {
             --primary: #6366f1; --primary-light: #eef2ff; --bg: #f8fafc; 
             --card: #ffffff; --text-main: #1e293b; --text-dim: #64748b; --border: #e2e8f0;
+            --panay: #0ea5e9; --mindanao: #f59e0b; --original: #6366f1;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -33,14 +34,20 @@
         .toggle-row label { font-size: 0.65rem; font-weight: 800; cursor: pointer; }
 
         /* --- UI ELEMENTS --- */
-        .batch-selector { display: flex; gap: 8px; background: #e2e8f0; padding: 5px; border-radius: 50px; width: fit-content; margin-bottom: 20px; }
-        .batch-pill { padding: 8px 18px; border-radius: 50px; border: none; font-weight: 800; font-size: 0.65rem; cursor: pointer; color: #64748b; background: transparent; }
+        .batch-selector { display: flex; flex-wrap: wrap; gap: 8px; background: #e2e8f0; padding: 5px; border-radius: 20px; width: fit-content; margin-bottom: 20px; }
+        .batch-pill { padding: 8px 18px; border-radius: 50px; border: none; font-weight: 800; font-size: 0.65rem; cursor: pointer; color: #64748b; background: transparent; transition: 0.2s; }
         .batch-pill.active { background: white; color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
 
-        .data-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
-        .participant-card { background: var(--card); border: 1px solid var(--border); padding: 12px; border-radius: 18px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; }
+        .data-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+        .participant-card { background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 18px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.2s; position: relative; overflow: hidden; }
         .participant-card.selected { border-color: var(--primary); background: var(--primary-light); }
-        .p-info h4 { font-size: 0.75rem; text-transform: uppercase; margin-bottom: 2px; }
+        
+        .cluster-indicator { position: absolute; top: 0; right: 0; padding: 4px 12px; font-size: 0.5rem; font-weight: 900; color: white; border-bottom-left-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .bg-panay { background: var(--panay); }
+        .bg-mindanao { background: var(--mindanao); }
+        .bg-original { background: var(--original); }
+
+        .p-info h4 { font-size: 0.75rem; text-transform: uppercase; margin-bottom: 2px; width: 90%; }
         .p-info p { font-size: 0.6rem; color: var(--text-dim); margin-bottom: 1px; }
 
         /* --- PRINT ENGINE --- */
@@ -49,7 +56,6 @@
         .id-slot { width: 9.5cm; height: 13cm; border: 1px dashed #ccc; position: relative; background-size: 100% 100%; overflow: hidden; background-repeat: no-repeat; }
         .print-text { position: absolute; transform: translate(-50%, -50%); text-align: center; white-space: pre-wrap; color: #000; width: 90%; }
         
-        /* QR Styling */
         .qr-wrapper { position: absolute; transform: translate(-50%, -50%); background: white; padding: 5px; display: flex; align-items: center; justify-content: center; }
 
         @media print {
@@ -76,21 +82,21 @@
             <div class="white-panel">
                 <div class="panel-header">🎯 Name Layer</div>
                 <div class="editor-grid">
-                    <div class="control-item"><label>Top %</label><input type="number" id="nameTop" value="48" oninput="updateConfig()"></div>
-                    <div class="control-item"><label>Left %</label><input type="number" id="nameLeft" value="50" oninput="updateConfig()"></div>
-                    <div class="control-item"><label>Size px</label><input type="number" id="nameSize" value="28" oninput="updateConfig()"></div>
+                    <div class="control-item"><label>Top %</label><input type="number" id="nameTop" value="48"></div>
+                    <div class="control-item"><label>Left %</label><input type="number" id="nameLeft" value="50"></div>
+                    <div class="control-item"><label>Size px</label><input type="number" id="nameSize" value="28"></div>
                 </div>
             </div>
 
             <div class="white-panel">
                 <div class="panel-header">🏢 Institution Layer</div>
                 <div class="editor-grid">
-                    <div class="control-item"><label>Top %</label><input type="number" id="instTop" value="55" oninput="updateConfig()"></div>
-                    <div class="control-item"><label>Left %</label><input type="number" id="instLeft" value="50" oninput="updateConfig()"></div>
-                    <div class="control-item"><label>Size px</label><input type="number" id="instSize" value="14" oninput="updateConfig()"></div>
+                    <div class="control-item"><label>Top %</label><input type="number" id="instTop" value="55"></div>
+                    <div class="control-item"><label>Left %</label><input type="number" id="instLeft" value="50"></div>
+                    <div class="control-item"><label>Size px</label><input type="number" id="instSize" value="14"></div>
                 </div>
                 <div class="toggle-row">
-                    <input type="checkbox" id="showInst" checked onchange="updateConfig()">
+                    <input type="checkbox" id="showInst" checked>
                     <label for="showInst">Print Institution</label>
                 </div>
             </div>
@@ -98,46 +104,36 @@
             <div class="white-panel">
                 <div class="panel-header">📱 Attendance QR Layer</div>
                 <div class="editor-grid">
-                    <div class="control-item"><label>Top %</label><input type="number" id="qrTop" value="82" oninput="updateConfig()"></div>
-                    <div class="control-item"><label>Left %</label><input type="number" id="qrLeft" value="50" oninput="updateConfig()"></div>
-                    <div class="control-item"><label>Size px</label><input type="number" id="qrSize" value="80" oninput="updateConfig()"></div>
+                    <div class="control-item"><label>Top %</label><input type="number" id="qrTop" value="82"></div>
+                    <div class="control-item"><label>Left %</label><input type="number" id="qrLeft" value="50"></div>
+                    <div class="control-item"><label>Size px</label><input type="number" id="qrSize" value="80"></div>
                 </div>
                 <div class="toggle-row">
-                    <input type="checkbox" id="showQR" checked onchange="updateConfig()">
+                    <input type="checkbox" id="showQR" checked>
                     <label for="showQR">Generate QR Code</label>
                 </div>
             </div>
 
-            <div class="white-panel">
-                <div class="panel-header">👤 Position Layer (Col L)</div>
-                <div class="editor-grid">
-                    <div class="control-item"><label>Top %</label><input type="number" id="posTop" value="62" oninput="updateConfig()"></div>
-                    <div class="control-item"><label>Left %</label><input type="number" id="posLeft" value="50" oninput="updateConfig()"></div>
-                    <div class="control-item"><label>Size px</label><input type="number" id="posSize" value="12" oninput="updateConfig()"></div>
-                </div>
-                <div class="toggle-row">
-                    <input type="checkbox" id="showPos" onchange="updateConfig()">
-                    <label for="showPos">Print Position (L)</label>
-                </div>
-            </div>
-
-            <button class="batch-pill" style="width:100%; background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca;" onclick="localStorage.clear(); location.reload();">Reset Settings</button>
+            <button class="batch-pill" style="width:100%; background: #fee2e2; color: #b91c1c;" onclick="localStorage.clear(); location.reload();">Reset Terminal</button>
         </div>
 
         <div class="main-view">
             <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center;">
                 <div style="flex-grow: 1; background: white; border: 1px solid var(--border); padding: 10px 20px; border-radius: 50px; display: flex; align-items: center;">
-                    <input type="text" id="globalSearch" placeholder="Search name, school, or position..." onkeyup="render()" style="width:100%; border:none; outline:none; font-size: 0.9rem;">
+                    <input type="text" id="globalSearch" placeholder="Search name or school..." onkeyup="render()" style="width:100%; border:none; outline:none; font-size: 0.9rem;">
                 </div>
-                <button class="batch-pill active" style="background: var(--primary); color:white; height:42px;" onclick="fetchLiveData()" id="syncBtn">🔄 SYNC DATA</button>
+                <button class="batch-pill active" style="background: var(--primary); color:white; height:42px;" onclick="fetchLiveData()" id="syncBtn">🔄 SYNC ALL SOURCES</button>
                 <button class="batch-pill active" style="background: #1e293b; color:white; height:42px;" onclick="printSelected()" id="printSelectedBtn">✅ PRINT (0)</button>
             </div>
 
             <div class="batch-selector">
                 <button class="batch-pill active" onclick="setFilterBatch('all', this)">ALL</button>
-                <button class="batch-pill" onclick="setFilterBatch('batch1', this)">BATCH 1</button>
-                <button class="batch-pill" onclick="setFilterBatch('batch2', this)">BATCH 2</button>
-                <button class="batch-pill" onclick="setFilterBatch('batch3', this)">BATCH 3</button>
+                <button class="batch-pill" onclick="setFilterBatch('batch1', this)">B1</button>
+                <button class="batch-pill" onclick="setFilterBatch('batch2', this)">B2</button>
+                <button class="batch-pill" onclick="setFilterBatch('batch3', this)">B3 (PANAY)</button>
+                <button class="batch-pill" onclick="setFilterBatch('batch4', this)">B4 (MINDANAO)</button>
+                <button class="batch-pill" onclick="setFilterBatch('batch5', this)">B5</button>
+                <button class="batch-pill" onclick="setFilterBatch('batch6', this)">B6</button>
             </div>
 
             <div id="listContainer" class="data-grid"></div>
@@ -147,62 +143,96 @@
     <div id="bulk-container"></div>
 
     <script>
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJEJuWYBbbEtvlroXnqVtjt2V4Ev_F8iT4HR0Pi419O1xEgD4VDfFcyuaT1XiMmG6AZtX8yR5euWyc/pub?output=csv';
+        const URLS = {
+            panay: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSNs_RBN6sLDKG1GdPw-zAUBQc94_EVztntR4kWCmkebFUATHQalopVuzhlEBCBeJ0nNki8zn75pPTU/pub?output=csv',
+            mindanao: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vROJBuC8QcVYdbkOWg7UlUhVAgnFOSa9i7p7HRGgABYIPdsxw31MEx0fzBrkH5I1_k2-mSDf6Y2itVJ/pub?output=csv',
+            original: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJEJuWYBbbEtvlroXnqVtjt2V4Ev_F8iT4HR0Pi419O1xEgD4VDfFcyuaT1XiMmG6AZtX8yR5euWyc/pub?output=csv'
+        };
 
         let allParticipants = [];
         let selectedIds = new Set();
         let backgroundData = '';
         let filterBatch = 'all';
 
-        window.onload = () => {
-            const saved = JSON.parse(localStorage.getItem('idTerminalV5_0'));
-            if (saved) {
-                Object.keys(saved).forEach(key => {
-                    const el = document.getElementById(key);
-                    if(el) {
-                        if(el.type === 'checkbox') el.checked = saved[key];
-                        else el.value = saved[key];
-                    }
-                });
-                backgroundData = saved.background || '';
-                if(backgroundData) document.getElementById('tplStatus').innerText = "✅ Template Loaded";
-            }
-            fetchLiveData();
-        };
-
         async function fetchLiveData() {
             const btn = document.getElementById('syncBtn');
-            btn.innerText = "⌛...";
+            btn.innerText = "Syncing 3 Sources...";
+            allParticipants = []; 
+
             try {
-                const response = await fetch(CSV_URL + '&t=' + Date.now());
-                const csvText = await response.text();
-                const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== "");
-                const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/"/g, ''));
+                const results = await Promise.all([
+                    fetchSource(URLS.original, 'original'),
+                    fetchSource(URLS.panay, 'panay'),
+                    fetchSource(URLS.mindanao, 'mindanao')
+                ]);
                 
-                const nameIdx = headers.indexOf('fullname');
-                const batchIdx = headers.indexOf('schedule');
-                const instIdx = headers.indexOf('institution');
-                const posIdx = headers.indexOf('position');
-
-                allParticipants = lines.slice(1).map((line, index) => {
-                    const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, '').trim());
-                    return {
-                        uid: 'p_' + index,
-                        name: cols[nameIdx] || 'UNKNOWN',
-                        batch: (cols[batchIdx] || '').toLowerCase().replace(/\s/g, ''),
-                        institution: cols[instIdx] || 'No School',
-                        position: cols[posIdx] || 'No Position'
-                    };
-                }).filter(p => p.name !== 'UNKNOWN');
-
+                allParticipants = results.flat();
                 render();
-                btn.innerText = "🔄 SYNC DONE";
-            } catch (err) { btn.innerText = "❌ ERROR"; }
+                btn.innerText = "🔄 SYNC COMPLETE";
+            } catch (err) {
+                btn.innerText = "❌ SYNC FAILED";
+                console.error(err);
+            }
+        }
+
+        async function fetchSource(url, clusterType) {
+            const res = await fetch(url + '&t=' + Date.now());
+            const text = await res.text();
+            const lines = text.split(/\r?\n/).filter(l => l.trim() !== "");
+            const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/"/g, ''));
+            
+            const nameIdx = headers.indexOf('fullname');
+            const instIdx = headers.indexOf('institution');
+            const batchIdx = headers.indexOf('schedule');
+
+            return lines.slice(1).map((line, i) => {
+                const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, '').trim());
+                
+                let batch = (cols[batchIdx] || '').toLowerCase().replace(/\s/g, '');
+                // Override batch based on Cluster Type
+                if(clusterType === 'panay') batch = 'batch3';
+                if(clusterType === 'mindanao') batch = 'batch4';
+
+                return {
+                    uid: `${clusterType}_${i}`,
+                    name: cols[nameIdx] || 'UNKNOWN',
+                    institution: cols[instIdx] || 'N/A',
+                    batch: batch,
+                    cluster: clusterType
+                };
+            }).filter(p => p.name !== 'UNKNOWN');
+        }
+
+        function render() {
+            const q = document.getElementById('globalSearch').value.toUpperCase();
+            const container = document.getElementById('listContainer');
+            const filtered = allParticipants.filter(p => {
+                const searchMatch = (p.name + p.institution).toUpperCase().includes(q);
+                const batchMatch = filterBatch === 'all' || p.batch === filterBatch;
+                return searchMatch && batchMatch;
+            });
+
+            container.innerHTML = filtered.map(p => `
+                <div class="participant-card ${selectedIds.has(p.uid) ? 'selected' : ''}" onclick="toggleSelect('${p.uid}')">
+                    <div class="cluster-indicator bg-${p.cluster}">${p.cluster}</div>
+                    <div class="p-info">
+                        <h4>${p.name}</h4>
+                        <p>${p.institution}</p>
+                        <p style="font-weight: 800; color: var(--primary);">${p.batch.toUpperCase()}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleSelect(uid) {
+            selectedIds.has(uid) ? selectedIds.delete(uid) : selectedIds.add(uid);
+            document.getElementById('printSelectedBtn').innerText = `✅ PRINT (${selectedIds.size})`;
+            render();
         }
 
         function setFilterBatch(b, btn) {
             filterBatch = b;
-            document.querySelectorAll('.batch-selector .batch-pill').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.batch-pill').forEach(p => p.classList.remove('active'));
             btn.classList.add('active');
             render();
         }
@@ -212,14 +242,17 @@
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     backgroundData = e.target.result;
-                    document.getElementById('tplStatus').innerText = "✅ Ready";
-                    updateConfig();
+                    document.getElementById('tplStatus').innerText = "✅ Template Ready";
                 };
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
-        function updateConfig() {
+        function printSelected() {
+            if (!backgroundData) return alert("Upload background first!");
+            const toPrint = allParticipants.filter(p => selectedIds.has(p.uid));
+            if (!toPrint.length) return alert("Select participants!");
+
             const config = {
                 nameTop: document.getElementById('nameTop').value,
                 nameLeft: document.getElementById('nameLeft').value,
@@ -227,105 +260,44 @@
                 instTop: document.getElementById('instTop').value,
                 instLeft: document.getElementById('instLeft').value,
                 instSize: document.getElementById('instSize').value,
-                posTop: document.getElementById('posTop').value,
-                posLeft: document.getElementById('posLeft').value,
-                posSize: document.getElementById('posSize').value,
                 qrTop: document.getElementById('qrTop').value,
                 qrLeft: document.getElementById('qrLeft').value,
                 qrSize: document.getElementById('qrSize').value,
                 showInst: document.getElementById('showInst').checked,
-                showPos: document.getElementById('showPos').checked,
-                showQR: document.getElementById('showQR').checked,
-                background: backgroundData
+                showQR: document.getElementById('showQR').checked
             };
-            localStorage.setItem('idTerminalV5_0', JSON.stringify(config));
-        }
 
-        function render() {
-            const q = document.getElementById('globalSearch').value.toUpperCase();
-            const container = document.getElementById('listContainer');
-            const filtered = allParticipants.filter(p => {
-                const searchTxt = `${p.name} ${p.institution} ${p.position}`.toUpperCase();
-                const batchMatch = filterBatch === 'all' || p.batch === filterBatch;
-                return searchTxt.includes(q) && batchMatch;
-            });
+            const bulk = document.getElementById('bulk-container');
+            bulk.innerHTML = '';
 
-            container.innerHTML = filtered.map(p => `
-                <div class="participant-card ${selectedIds.has(p.uid) ? 'selected' : ''}" onclick="toggleSelect('${p.uid}')">
-                    <input type="checkbox" ${selectedIds.has(p.uid) ? 'checked' : ''} style="pointer-events: none;">
-                    <div class="p-info">
-                        <h4>${p.name}</h4>
-                        <p>${p.institution} • <b>${p.position}</b></p>
-                        <p style="font-weight: 800; color: var(--primary);">${p.batch.toUpperCase()}</p>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function toggleSelect(uid) {
-            if (selectedIds.has(uid)) selectedIds.delete(uid);
-            else selectedIds.add(uid);
-            document.getElementById('printSelectedBtn').innerText = `✅ PRINT (${selectedIds.size})`;
-            render();
-        }
-
-        async function printSelected() {
-            if (!backgroundData) return alert("Upload template first!");
-            const toPrint = allParticipants.filter(p => selectedIds.has(p.uid));
-            if (!toPrint.length) return alert("Select someone to print.");
-            
-            const config = JSON.parse(localStorage.getItem('idTerminalV5_0'));
-            const bulkContainer = document.getElementById('bulk-container');
-            bulkContainer.innerHTML = ''; // Clear previous
-
-            let html = '';
-            // Create sheets
             for (let i = 0; i < toPrint.length; i += 4) {
-                let sheetHtml = `<div class="paper">`;
+                let sheet = `<div class="paper">`;
                 for (let j = 0; j < 4; j++) {
                     const p = toPrint[i + j];
                     if (p) {
-                        const instText = config.showInst ? p.institution : '';
-                        const posText = config.showPos ? p.position : '';
-                        const qrId = `qr_${p.uid}`;
-                        
-                        sheetHtml += `
+                        sheet += `
                         <div class="id-slot" style="background-image: url('${backgroundData}')">
                             <div class="print-text" style="top:${config.nameTop}%; left:${config.nameLeft}%; font-size:${config.nameSize}px; font-weight:800;">${p.name}</div>
-                            <div class="print-text" style="top:${config.instTop}%; left:${config.instLeft}%; font-size:${config.instSize}px; font-weight:600; color:#334155;">${instText}</div>
-                            <div class="print-text" style="top:${config.posTop}%; left:${config.posLeft}%; font-size:${config.posSize}px; font-weight:600; color:#555;">${posText}</div>
-                            ${config.showQR ? `<div id="${qrId}" class="qr-wrapper" style="top:${config.qrTop}%; left:${config.qrLeft}%;"></div>` : ''}
+                            ${config.showInst ? `<div class="print-text" style="top:${config.instTop}%; left:${config.instLeft}%; font-size:${config.instSize}px;">${p.institution}</div>` : ''}
+                            ${config.showQR ? `<div id="qr_${p.uid}" class="qr-wrapper" style="top:${config.qrTop}%; left:${config.qrLeft}%;"></div>` : ''}
                         </div>`;
                     }
                 }
-                sheetHtml += `</div>`;
-                html += sheetHtml;
+                sheet += `</div>`;
+                bulk.innerHTML += sheet;
             }
 
-            bulkContainer.innerHTML = html;
-
-            // Generate QR Codes after HTML is inserted
             if (config.showQR) {
                 toPrint.forEach(p => {
-                    const qrElement = document.getElementById(`qr_${p.uid}`);
-                    if (qrElement) {
-                        new QRCode(qrElement, {
-                            text: p.name, // You can change this to a URL or unique ID
-                            width: parseInt(config.qrSize),
-                            height: parseInt(config.qrSize),
-                            colorDark : "#000000",
-                            colorLight : "#ffffff",
-                            correctLevel : QRCode.CorrectLevel.H
-                        });
-                    }
+                    const el = document.getElementById(`qr_${p.uid}`);
+                    if (el) new QRCode(el, { text: p.name, width: parseInt(config.qrSize), height: parseInt(config.qrSize) });
                 });
             }
 
-            // Wait a tiny bit for QR rendering before print dialog
-            setTimeout(() => {
-                window.print();
-            }, 500);
+            setTimeout(() => window.print(), 500);
         }
+
+        window.onload = fetchLiveData;
     </script>
 </body>
 </html>
