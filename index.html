@@ -6,6 +6,7 @@
     <title>Teachers Training 2026 | Multi-Cluster ID Terminal v5.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
         :root {
@@ -123,7 +124,8 @@
                     <input type="text" id="globalSearch" placeholder="Search name or school..." onkeyup="render()" style="width:100%; border:none; outline:none; font-size: 0.9rem;">
                 </div>
                 <button class="batch-pill active" style="background: var(--primary); color:white; height:42px;" onclick="fetchLiveData()" id="syncBtn">🔄 SYNC ALL SOURCES</button>
-                <button class="batch-pill active" style="background: #1e293b; color:white; height:42px;" onclick="printSelected()" id="printSelectedBtn">✅ PRINT (0)</button>
+                <button class="batch-pill active" style="background: #1e293b; color:white; height:42px;" onclick="generateContent('print')" id="printSelectedBtn">✅ PRINT (0)</button>
+                <button class="batch-pill active" style="background: #059669; color:white; height:42px;" onclick="generateContent('pdf')" id="pdfBtn">📄 EXPORT PDF</button>
             </div>
 
             <div class="batch-selector">
@@ -189,7 +191,6 @@
                 const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, '').trim());
                 
                 let batch = (cols[batchIdx] || '').toLowerCase().replace(/\s/g, '');
-                // Override batch based on Cluster Type
                 if(clusterType === 'panay') batch = 'batch3';
                 if(clusterType === 'mindanao') batch = 'batch4';
 
@@ -248,7 +249,8 @@
             }
         }
 
-        function printSelected() {
+        // Shared function for Print and PDF
+        function generateContent(mode) {
             if (!backgroundData) return alert("Upload background first!");
             const toPrint = allParticipants.filter(p => selectedIds.has(p.uid));
             if (!toPrint.length) return alert("Select participants!");
@@ -269,6 +271,7 @@
 
             const bulk = document.getElementById('bulk-container');
             bulk.innerHTML = '';
+            bulk.style.display = 'block'; // Temporarily show for processing
 
             for (let i = 0; i < toPrint.length; i += 4) {
                 let sheet = `<div class="paper">`;
@@ -294,7 +297,24 @@
                 });
             }
 
-            setTimeout(() => window.print(), 500);
+            if (mode === 'print') {
+                setTimeout(() => {
+                    window.print();
+                    bulk.style.display = 'none';
+                }, 500);
+            } else {
+                const opt = {
+                    margin:       0,
+                    filename:     'Teachers_IDs_2026.pdf',
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true },
+                    jsPDF:        { unit: 'cm', format: 'letter', orientation: 'portrait' }
+                };
+                
+                html2pdf().set(opt).from(bulk).save().then(() => {
+                    bulk.style.display = 'none';
+                });
+            }
         }
 
         window.onload = fetchLiveData;
