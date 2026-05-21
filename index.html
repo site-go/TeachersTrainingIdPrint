@@ -2,17 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teachers Training 2026 | Multi-Cluster ID Terminal v5.1</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Teachers Training 2026 | Multi-Cluster ID Terminal v6.0 — ZAMPEN Integrated</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
         :root {
-            --primary: #6366f1; --primary-light: #eef2ff; --bg: #f8fafc; 
-            --card: #ffffff; --text-main: #1e293b; --text-dim: #64748b; --border: #e2e8f0;
-            --panay: #0ea5e9; --mindanao: #f59e0b; --original: #6366f1;
+            --primary: #6366f1;
+            --primary-light: #eef2ff;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text-main: #1e293b;
+            --text-dim: #64748b;
+            --border: #e2e8f0;
+            --panay: #0ea5e9;
+            --mindanao: #f59e0b;
+            --original: #6366f1;
+            --zampen: #8b5cf6;      /* vibrant purple for ZAMPEN cluster */
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -24,7 +32,7 @@
         .white-panel { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
         .panel-header { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--primary); margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
         
-        .upload-zone { border: 2px dashed var(--border); padding: 15px; border-radius: 16px; text-align: center; cursor: pointer; background: var(--bg); margin-bottom: 5px; font-size: 0.8rem; }
+        .upload-zone { border: 2px dashed var(--border); padding: 15px; border-radius: 16px; text-align: center; cursor: pointer; background: var(--bg); margin-bottom: 5px; font-size: 0.8rem; transition: 0.2s; }
         .editor-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .control-item { display: flex; flex-direction: column; gap: 4px; }
         .control-item label { font-size: 0.55rem; font-weight: 800; color: var(--text-dim); text-transform: uppercase; }
@@ -47,6 +55,7 @@
         .bg-panay { background: var(--panay); }
         .bg-mindanao { background: var(--mindanao); }
         .bg-original { background: var(--original); }
+        .bg-zampen { background: var(--zampen); }
 
         .p-info h4 { font-size: 0.75rem; text-transform: uppercase; margin-bottom: 2px; width: 90%; }
         .p-info p { font-size: 0.6rem; color: var(--text-dim); margin-bottom: 1px; }
@@ -54,10 +63,10 @@
         /* --- PRINT ENGINE --- */
         #bulk-container { display: none; }
         .paper { width: 21.59cm; height: 27.94cm; background: white; display: grid; grid-template-columns: 9.5cm 9.5cm; grid-template-rows: 13cm 13cm; gap: 5mm; padding: 1cm; box-sizing: border-box; justify-content: center; align-content: start; page-break-after: always; position: relative; }
-        .id-slot { width: 9.5cm; height: 13cm; border: 1px dashed #ccc; position: relative; background-size: 100% 100%; overflow: hidden; background-repeat: no-repeat; }
-        .print-text { position: absolute; transform: translate(-50%, -50%); text-align: center; white-space: pre-wrap; color: #000; width: 90%; }
+        .id-slot { width: 9.5cm; height: 13cm; border: 1px dashed #ccc; position: relative; background-size: 100% 100%; overflow: hidden; background-repeat: no-repeat; background-position: center; background-color: white; }
+        .print-text { position: absolute; transform: translate(-50%, -50%); text-align: center; white-space: pre-wrap; color: #000; width: 90%; font-weight: 600; text-shadow: 0 0 2px white; }
         
-        .qr-wrapper { position: absolute; transform: translate(-50%, -50%); background: white; padding: 5px; display: flex; align-items: center; justify-content: center; }
+        .qr-wrapper { position: absolute; transform: translate(-50%, -50%); background: white; padding: 5px; display: flex; align-items: center; justify-content: center; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 
         @media print {
             body { padding: 0; background: white !important; }
@@ -70,254 +79,403 @@
 </head>
 <body>
 
-    <div class="layout-wrapper">
-        <div class="sidebar">
-            <div class="white-panel">
-                <div class="panel-header">🖼️ Template Asset</div>
-                <div class="upload-zone" onclick="document.getElementById('tplUpload').click()">
-                    <p id="tplStatus">Upload Background Template</p>
-                    <input type="file" id="tplUpload" hidden accept="image/*" onchange="handleTemplate(this)">
-                </div>
+<div class="layout-wrapper">
+    <div class="sidebar">
+        <div class="white-panel">
+            <div class="panel-header">🖼️ Template Asset</div>
+            <div class="upload-zone" onclick="document.getElementById('tplUpload').click()">
+                <p id="tplStatus">📸 Upload Background Template (PNG/JPG)</p>
+                <input type="file" id="tplUpload" hidden accept="image/*" onchange="handleTemplate(this)">
             </div>
-
-            <div class="white-panel">
-                <div class="panel-header">🎯 Name Layer</div>
-                <div class="editor-grid">
-                    <div class="control-item"><label>Top %</label><input type="number" id="nameTop" value="48"></div>
-                    <div class="control-item"><label>Left %</label><input type="number" id="nameLeft" value="50"></div>
-                    <div class="control-item"><label>Size px</label><input type="number" id="nameSize" value="28"></div>
-                </div>
-            </div>
-
-            <div class="white-panel">
-                <div class="panel-header">🏢 Institution Layer</div>
-                <div class="editor-grid">
-                    <div class="control-item"><label>Top %</label><input type="number" id="instTop" value="55"></div>
-                    <div class="control-item"><label>Left %</label><input type="number" id="instLeft" value="50"></div>
-                    <div class="control-item"><label>Size px</label><input type="number" id="instSize" value="14"></div>
-                </div>
-                <div class="toggle-row">
-                    <input type="checkbox" id="showInst" checked>
-                    <label for="showInst">Print Institution</label>
-                </div>
-            </div>
-
-            <div class="white-panel">
-                <div class="panel-header">📱 Attendance QR Layer</div>
-                <div class="editor-grid">
-                    <div class="control-item"><label>Top %</label><input type="number" id="qrTop" value="82"></div>
-                    <div class="control-item"><label>Left %</label><input type="number" id="qrLeft" value="50"></div>
-                    <div class="control-item"><label>Size px</label><input type="number" id="qrSize" value="80"></div>
-                </div>
-                <div class="toggle-row">
-                    <input type="checkbox" id="showQR" checked>
-                    <label for="showQR">Generate QR Code</label>
-                </div>
-            </div>
-
-            <button class="batch-pill" style="width:100%; background: #fee2e2; color: #b91c1c;" onclick="localStorage.clear(); location.reload();">Reset Terminal</button>
         </div>
 
-        <div class="main-view">
-            <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center;">
-                <div style="flex-grow: 1; background: white; border: 1px solid var(--border); padding: 10px 20px; border-radius: 50px; display: flex; align-items: center;">
-                    <input type="text" id="globalSearch" placeholder="Search name or school..." onkeyup="render()" style="width:100%; border:none; outline:none; font-size: 0.9rem;">
-                </div>
-                <button class="batch-pill active" style="background: var(--primary); color:white; height:42px;" onclick="fetchLiveData()" id="syncBtn">🔄 SYNC ALL SOURCES</button>
-                <button class="batch-pill active" style="background: #1e293b; color:white; height:42px;" onclick="generateContent('print')" id="printSelectedBtn">✅ PRINT (0)</button>
-                <button class="batch-pill active" style="background: #059669; color:white; height:42px;" onclick="generateContent('pdf')" id="pdfBtn">📄 EXPORT PDF</button>
+        <div class="white-panel">
+            <div class="panel-header">🎯 Name Layer</div>
+            <div class="editor-grid">
+                <div class="control-item"><label>Top %</label><input type="number" id="nameTop" value="48"></div>
+                <div class="control-item"><label>Left %</label><input type="number" id="nameLeft" value="50"></div>
+                <div class="control-item"><label>Size px</label><input type="number" id="nameSize" value="28"></div>
             </div>
-
-            <div class="batch-selector">
-                <button class="batch-pill active" onclick="setFilterBatch('all', this)">ALL</button>
-                <button class="batch-pill" onclick="setFilterBatch('batch1', this)">B1</button>
-                <button class="batch-pill" onclick="setFilterBatch('batch2', this)">B2</button>
-                <button class="batch-pill" onclick="setFilterBatch('batch3', this)">B3 (PANAY)</button>
-                <button class="batch-pill" onclick="setFilterBatch('batch4', this)">B4 (MINDANAO)</button>
-                <button class="batch-pill" onclick="setFilterBatch('batch5', this)">B5</button>
-                <button class="batch-pill" onclick="setFilterBatch('batch6', this)">B6</button>
-            </div>
-
-            <div id="listContainer" class="data-grid"></div>
         </div>
+
+        <div class="white-panel">
+            <div class="panel-header">🏢 Institution Layer</div>
+            <div class="editor-grid">
+                <div class="control-item"><label>Top %</label><input type="number" id="instTop" value="55"></div>
+                <div class="control-item"><label>Left %</label><input type="number" id="instLeft" value="50"></div>
+                <div class="control-item"><label>Size px</label><input type="number" id="instSize" value="14"></div>
+            </div>
+            <div class="toggle-row">
+                <input type="checkbox" id="showInst" checked>
+                <label for="showInst">Print Institution</label>
+            </div>
+        </div>
+
+        <div class="white-panel">
+            <div class="panel-header">📱 Attendance QR Layer</div>
+            <div class="editor-grid">
+                <div class="control-item"><label>Top %</label><input type="number" id="qrTop" value="82"></div>
+                <div class="control-item"><label>Left %</label><input type="number" id="qrLeft" value="50"></div>
+                <div class="control-item"><label>Size px</label><input type="number" id="qrSize" value="80"></div>
+            </div>
+            <div class="toggle-row">
+                <input type="checkbox" id="showQR" checked>
+                <label for="showQR">Generate QR Code (participant name)</label>
+            </div>
+        </div>
+
+        <button class="batch-pill" style="width:100%; background: #fee2e2; color: #b91c1c;" onclick="localStorage.clear(); location.reload();">⟳ Reset Terminal & Clear Cache</button>
     </div>
 
-    <div id="bulk-container"></div>
+    <div class="main-view">
+        <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; flex-wrap: wrap;">
+            <div style="flex-grow: 1; background: white; border: 1px solid var(--border); padding: 10px 20px; border-radius: 50px; display: flex; align-items: center;">
+                <input type="text" id="globalSearch" placeholder="🔍 Search by name or school..." onkeyup="render()" style="width:100%; border:none; outline:none; font-size: 0.9rem;">
+            </div>
+            <button class="batch-pill active" style="background: var(--primary); color:white; height:42px;" onclick="fetchLiveData()" id="syncBtn">🔄 SYNC ALL CLUSTERS</button>
+            <button class="batch-pill active" style="background: #1e293b; color:white; height:42px;" onclick="generateContent('print')" id="printSelectedBtn">✅ PRINT (0)</button>
+            <button class="batch-pill active" style="background: #059669; color:white; height:42px;" onclick="generateContent('pdf')" id="pdfBtn">📄 EXPORT PDF</button>
+        </div>
 
-    <script>
-        const URLS = {
-            panay: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSNs_RBN6sLDKG1GdPw-zAUBQc94_EVztntR4kWCmkebFUATHQalopVuzhlEBCBeJ0nNki8zn75pPTU/pub?output=csv',
-            mindanao: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vROJBuC8QcVYdbkOWg7UlUhVAgnFOSa9i7p7HRGgABYIPdsxw31MEx0fzBrkH5I1_k2-mSDf6Y2itVJ/pub?output=csv',
-            original: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJEJuWYBbbEtvlroXnqVtjt2V4Ev_F8iT4HR0Pi419O1xEgD4VDfFcyuaT1XiMmG6AZtX8yR5euWyc/pub?output=csv'
-        };
+        <div class="batch-selector" id="batchFilterBar">
+            <button class="batch-pill active" data-batch="all" onclick="setFilterBatch('all', this)">ALL</button>
+            <button class="batch-pill" data-batch="batch1" onclick="setFilterBatch('batch1', this)">B1</button>
+            <button class="batch-pill" data-batch="batch2" onclick="setFilterBatch('batch2', this)">B2</button>
+            <button class="batch-pill" data-batch="batch3" onclick="setFilterBatch('batch3', this)">B3 (PANAY)</button>
+            <button class="batch-pill" data-batch="batch4" onclick="setFilterBatch('batch4', this)">B4 (MINDANAO)</button>
+            <button class="batch-pill" data-batch="zampen" onclick="setFilterBatch('zampen', this)">✨ B3.2 (ZAMPEN)</button>
+            <button class="batch-pill" data-batch="batch5" onclick="setFilterBatch('batch5', this)">B5</button>
+            <button class="batch-pill" data-batch="batch6" onclick="setFilterBatch('batch6', this)">B6</button>
+        </div>
 
-        let allParticipants = [];
-        let selectedIds = new Set();
-        let backgroundData = '';
-        let filterBatch = 'all';
+        <div id="listContainer" class="data-grid"></div>
+        <div id="loadingIndicator" style="text-align:center; padding: 2rem; color: gray;">⬇️ Loading teacher data from all clusters...</div>
+    </div>
+</div>
 
-        async function fetchLiveData() {
-            const btn = document.getElementById('syncBtn');
-            btn.innerText = "Syncing 3 Sources...";
-            allParticipants = []; 
+<div id="bulk-container"></div>
 
-            try {
-                const results = await Promise.all([
-                    fetchSource(URLS.original, 'original'),
-                    fetchSource(URLS.panay, 'panay'),
-                    fetchSource(URLS.mindanao, 'mindanao')
-                ]);
-                
-                allParticipants = results.flat();
-                render();
-                btn.innerText = "🔄 SYNC COMPLETE";
-            } catch (err) {
-                btn.innerText = "❌ SYNC FAILED";
-                console.error(err);
-            }
-        }
+<script>
+    // ========================  ZAMPEN & ALL CLUSTER SOURCES =========================
+    const URLS = {
+        original: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJEJuWYBbbEtvlroXnqVtjt2V4Ev_F8iT4HR0Pi419O1xEgD4VDfFcyuaT1XiMmG6AZtX8yR5euWyc/pub?output=csv',
+        panay: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSNs_RBN6sLDKG1GdPw-zAUBQc94_EVztntR4kWCmkebFUATHQalopVuzhlEBCBeJ0nNki8zn75pPTU/pub?output=csv',
+        mindanao: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vROJBuC8QcVYdbkOWg7UlUhVAgnFOSa9i7p7HRGgABYIPdsxw31MEx0fzBrkH5I1_k2-mSDf6Y2itVJ/pub?output=csv',
+        zampen: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSp5cKBgVLQS8OGQA3n2qiCLM3igNoCl10kSpXbL75eLzw5r6ZXDR-g7dbKo_yOhaJ517tECIC3pUg-/pub?output=csv'
+    };
 
-        async function fetchSource(url, clusterType) {
-            const res = await fetch(url + '&t=' + Date.now());
+    let allParticipants = [];       // master array
+    let selectedIds = new Set();
+    let backgroundData = '';        // base64 background image
+    let filterBatch = 'all';
+
+    // ---------- Helper: fetch & parse any CSV source with column mapping ----------
+    async function fetchSource(url, clusterType) {
+        try {
+            const res = await fetch(url + '&nocache=' + Date.now());
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const text = await res.text();
             const lines = text.split(/\r?\n/).filter(l => l.trim() !== "");
+            if (lines.length < 2) return [];
+
+            // parse headers (lowercase)
             const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/"/g, ''));
-            
             const nameIdx = headers.indexOf('fullname');
             const instIdx = headers.indexOf('institution');
             const batchIdx = headers.indexOf('schedule');
 
-            return lines.slice(1).map((line, i) => {
-                const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, '').trim());
-                
-                let batch = (cols[batchIdx] || '').toLowerCase().replace(/\s/g, '');
-                if(clusterType === 'panay') batch = 'batch3';
-                if(clusterType === 'mindanao') batch = 'batch4';
-
-                return {
-                    uid: `${clusterType}_${i}`,
-                    name: cols[nameIdx] || 'UNKNOWN',
-                    institution: cols[instIdx] || 'N/A',
-                    batch: batch,
-                    cluster: clusterType
-                };
-            }).filter(p => p.name !== 'UNKNOWN');
-        }
-
-        function render() {
-            const q = document.getElementById('globalSearch').value.toUpperCase();
-            const container = document.getElementById('listContainer');
-            const filtered = allParticipants.filter(p => {
-                const searchMatch = (p.name + p.institution).toUpperCase().includes(q);
-                const batchMatch = filterBatch === 'all' || p.batch === filterBatch;
-                return searchMatch && batchMatch;
-            });
-
-            container.innerHTML = filtered.map(p => `
-                <div class="participant-card ${selectedIds.has(p.uid) ? 'selected' : ''}" onclick="toggleSelect('${p.uid}')">
-                    <div class="cluster-indicator bg-${p.cluster}">${p.cluster}</div>
-                    <div class="p-info">
-                        <h4>${p.name}</h4>
-                        <p>${p.institution}</p>
-                        <p style="font-weight: 800; color: var(--primary);">${p.batch.toUpperCase()}</p>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function toggleSelect(uid) {
-            selectedIds.has(uid) ? selectedIds.delete(uid) : selectedIds.add(uid);
-            document.getElementById('printSelectedBtn').innerText = `✅ PRINT (${selectedIds.size})`;
-            render();
-        }
-
-        function setFilterBatch(b, btn) {
-            filterBatch = b;
-            document.querySelectorAll('.batch-pill').forEach(p => p.classList.remove('active'));
-            btn.classList.add('active');
-            render();
-        }
-
-        function handleTemplate(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    backgroundData = e.target.result;
-                    document.getElementById('tplStatus').innerText = "✅ Template Ready";
-                };
-                reader.readAsDataURL(input.files[0]);
+            // if critical columns missing, fallback
+            if (nameIdx === -1) {
+                console.warn(`${clusterType}: missing 'fullname' column`);
+                return [];
             }
-        }
 
-        // Shared function for Print and PDF
-        function generateContent(mode) {
-            if (!backgroundData) return alert("Upload background first!");
-            const toPrint = allParticipants.filter(p => selectedIds.has(p.uid));
-            if (!toPrint.length) return alert("Select participants!");
+            const parsed = [];
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                if (!line.trim()) continue;
+                // regex to split CSV ignoring commas inside quotes
+                const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
+                const rawName = cols[nameIdx] || '';
+                if (!rawName || rawName === '') continue;
 
-            const config = {
-                nameTop: document.getElementById('nameTop').value,
-                nameLeft: document.getElementById('nameLeft').value,
-                nameSize: document.getElementById('nameSize').value,
-                instTop: document.getElementById('instTop').value,
-                instLeft: document.getElementById('instLeft').value,
-                instSize: document.getElementById('instSize').value,
-                qrTop: document.getElementById('qrTop').value,
-                qrLeft: document.getElementById('qrLeft').value,
-                qrSize: document.getElementById('qrSize').value,
-                showInst: document.getElementById('showInst').checked,
-                showQR: document.getElementById('showQR').checked
-            };
-
-            const bulk = document.getElementById('bulk-container');
-            bulk.innerHTML = '';
-            bulk.style.display = 'block'; // Temporarily show for processing
-
-            for (let i = 0; i < toPrint.length; i += 4) {
-                let sheet = `<div class="paper">`;
-                for (let j = 0; j < 4; j++) {
-                    const p = toPrint[i + j];
-                    if (p) {
-                        sheet += `
-                        <div class="id-slot" style="background-image: url('${backgroundData}')">
-                            <div class="print-text" style="top:${config.nameTop}%; left:${config.nameLeft}%; font-size:${config.nameSize}px; font-weight:800;">${p.name}</div>
-                            ${config.showInst ? `<div class="print-text" style="top:${config.instTop}%; left:${config.instLeft}%; font-size:${config.instSize}px;">${p.institution}</div>` : ''}
-                            ${config.showQR ? `<div id="qr_${p.uid}" class="qr-wrapper" style="top:${config.qrTop}%; left:${config.qrLeft}%;"></div>` : ''}
-                        </div>`;
-                    }
+                let rawInstitution = (instIdx !== -1 && cols[instIdx]) ? cols[instIdx] : 'N/A';
+                let rawSchedule = (batchIdx !== -1 && cols[batchIdx]) ? cols[batchIdx] : '';
+                
+                // ----- BATCH OVERRIDE LOGIC PER CLUSTER -----
+                let finalBatch = '';
+                if (clusterType === 'panay') {
+                    finalBatch = 'batch3';
+                } else if (clusterType === 'mindanao') {
+                    finalBatch = 'batch4';
+                } else if (clusterType === 'zampen') {
+                    finalBatch = 'zampen';   // dedicated filter for ZAMPEN group
+                } else {  // original cluster: parse schedule column (Batch 1 -> batch1, etc.)
+                    let cleaned = rawSchedule.toLowerCase().replace(/\s/g, '');
+                    if (cleaned.includes('batch1') || cleaned === 'batch1') finalBatch = 'batch1';
+                    else if (cleaned.includes('batch2') || cleaned === 'batch2') finalBatch = 'batch2';
+                    else if (cleaned.includes('batch3') || cleaned === 'batch3') finalBatch = 'batch3';
+                    else if (cleaned.includes('batch4') || cleaned === 'batch4') finalBatch = 'batch4';
+                    else if (cleaned.includes('batch5') || cleaned === 'batch5') finalBatch = 'batch5';
+                    else if (cleaned.includes('batch6') || cleaned === 'batch6') finalBatch = 'batch6';
+                    else finalBatch = 'unassigned';
                 }
-                sheet += `</div>`;
-                bulk.innerHTML += sheet;
-            }
 
-            if (config.showQR) {
-                toPrint.forEach(p => {
-                    const el = document.getElementById(`qr_${p.uid}`);
-                    if (el) new QRCode(el, { text: p.name, width: parseInt(config.qrSize), height: parseInt(config.qrSize) });
+                parsed.push({
+                    uid: `${clusterType}_${i}_${Date.now()}_${Math.random()}`,
+                    name: rawName.trim(),
+                    institution: rawInstitution.length > 50 ? rawInstitution.substring(0, 50) : rawInstitution,
+                    batch: finalBatch,
+                    cluster: clusterType
                 });
             }
+            return parsed;
+        } catch (err) {
+            console.error(`Failed to load ${clusterType}:`, err);
+            return [];
+        }
+    }
 
-            if (mode === 'print') {
-                setTimeout(() => {
-                    window.print();
-                    bulk.style.display = 'none';
-                }, 500);
-            } else {
-                const opt = {
-                    margin:       0,
-                    filename:     'Teachers_IDs_2026.pdf',
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true },
-                    jsPDF:        { unit: 'cm', format: 'letter', orientation: 'portrait' }
-                };
-                
-                html2pdf().set(opt).from(bulk).save().then(() => {
-                    bulk.style.display = 'none';
-                });
+    // ---------- MASTER FETCH (Original + Panay + Mindanao + ZAMPEN) ----------
+    async function fetchLiveData() {
+        const syncBtn = document.getElementById('syncBtn');
+        const loadingDiv = document.getElementById('loadingIndicator');
+        if (loadingDiv) loadingDiv.innerText = '🔄 Syncing teachers from 4 clusters (Original, Panay, Mindanao, ZAMPEN)...';
+        syncBtn.innerText = "⏳ SYNCING 4 SOURCES...";
+        syncBtn.disabled = true;
+        
+        try {
+            const results = await Promise.all([
+                fetchSource(URLS.original, 'original'),
+                fetchSource(URLS.panay, 'panay'),
+                fetchSource(URLS.mindanao, 'mindanao'),
+                fetchSource(URLS.zampen, 'zampen')
+            ]);
+            allParticipants = results.flat();
+            
+            // Remove any potential duplicates based on name+cluster edge case, but keep all
+            // filter empty names
+            allParticipants = allParticipants.filter(p => p.name && p.name !== 'UNKNOWN');
+            
+            // reset selection after fresh data load (optional)
+            selectedIds.clear();
+            updatePrintButtonText();
+            render();
+            
+            syncBtn.innerText = `✅ SYNCED (${allParticipants.length} participants)`;
+            if (loadingDiv) loadingDiv.style.display = 'none';
+        } catch (err) {
+            console.error("sync error", err);
+            syncBtn.innerText = "❌ SYNC ERROR";
+            if (loadingDiv) loadingDiv.innerText = "⚠️ Failed to load data. Check network / CORS. Retry.";
+        } finally {
+            syncBtn.disabled = false;
+        }
+    }
+
+    // helper update print button
+    function updatePrintButtonText() {
+        const btn = document.getElementById('printSelectedBtn');
+        if (btn) btn.innerText = `✅ PRINT (${selectedIds.size})`;
+    }
+
+    // toggle select / deselect
+    function toggleSelect(uid) {
+        if (selectedIds.has(uid)) selectedIds.delete(uid);
+        else selectedIds.add(uid);
+        updatePrintButtonText();
+        render();   // re-render to update card highlight
+    }
+
+    // batch filter (global)
+    function setFilterBatch(batchKey, btnElement) {
+        filterBatch = batchKey;
+        // update active UI
+        document.querySelectorAll('.batch-pill').forEach(pill => pill.classList.remove('active'));
+        if (btnElement) btnElement.classList.add('active');
+        render();
+    }
+
+    // render participant list with search + batch filter
+    function render() {
+        const searchQuery = document.getElementById('globalSearch')?.value.toUpperCase() || '';
+        const container = document.getElementById('listContainer');
+        if (!container) return;
+        
+        let filtered = allParticipants.filter(p => {
+            const matchesSearch = (p.name + ' ' + p.institution).toUpperCase().includes(searchQuery);
+            let matchesBatch = false;
+            if (filterBatch === 'all') matchesBatch = true;
+            else if (filterBatch === 'zampen') matchesBatch = (p.batch === 'zampen');
+            else matchesBatch = (p.batch === filterBatch);
+            return matchesSearch && matchesBatch;
+        });
+
+        if (filtered.length === 0) {
+            container.innerHTML = `<div style="padding: 40px; text-align: center; background: white; border-radius: 28px;">✨ No participants match filter/search. Try different batch or sync data.</div>`;
+            return;
+        }
+
+        container.innerHTML = filtered.map(p => `
+            <div class="participant-card ${selectedIds.has(p.uid) ? 'selected' : ''}" onclick="toggleSelect('${p.uid}')">
+                <div class="cluster-indicator bg-${p.cluster}">${p.cluster.toUpperCase()}</div>
+                <div class="p-info">
+                    <h4>${escapeHtml(p.name)}</h4>
+                    <p>${escapeHtml(p.institution)}</p>
+                    <p style="font-weight: 800; color: var(--primary); margin-top: 4px;">📌 ${p.batch === 'zampen' ? 'ZAMPEN BATCH' : p.batch.toUpperCase()}</p>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // simple XSS protection
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // handle background image upload
+    function handleTemplate(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                backgroundData = e.target.result;
+                document.getElementById('tplStatus').innerHTML = "✅ Template loaded ✔️";
+                document.getElementById('tplStatus').style.color = "green";
+            };
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            document.getElementById('tplStatus').innerHTML = "⚠️ No file selected";
+        }
+    }
+
+    // ---------- GENERATE ID CONTENT (PRINT / PDF) WITH QR support ----------
+    async function generateContent(mode) {
+        if (!backgroundData) {
+            alert("❌ Please upload a background template image first (PNG/JPG).");
+            return;
+        }
+        const selectedParticipants = allParticipants.filter(p => selectedIds.has(p.uid));
+        if (selectedParticipants.length === 0) {
+            alert("❗ No participants selected. Click on cards to select for ID printing.");
+            return;
+        }
+
+        // get position configs
+        const config = {
+            nameTop: document.getElementById('nameTop').value,
+            nameLeft: document.getElementById('nameLeft').value,
+            nameSize: document.getElementById('nameSize').value,
+            instTop: document.getElementById('instTop').value,
+            instLeft: document.getElementById('instLeft').value,
+            instSize: document.getElementById('instSize').value,
+            qrTop: document.getElementById('qrTop').value,
+            qrLeft: document.getElementById('qrLeft').value,
+            qrSize: document.getElementById('qrSize').value,
+            showInst: document.getElementById('showInst').checked,
+            showQR: document.getElementById('showQR').checked
+        };
+
+        const bulkContainer = document.getElementById('bulk-container');
+        bulkContainer.innerHTML = '';
+        bulkContainer.style.display = 'block';   // visible for render (hidden during normal view, print media handles)
+
+        // build pages (4 ID slots per paper)
+        for (let i = 0; i < selectedParticipants.length; i += 4) {
+            let pageHTML = `<div class="paper">`;
+            for (let j = 0; j < 4; j++) {
+                const participant = selectedParticipants[i + j];
+                if (participant) {
+                    pageHTML += `
+                        <div class="id-slot" style="background-image: url('${backgroundData}'); background-size: cover; background-position: center;">
+                            <div class="print-text" style="top: ${config.nameTop}%; left: ${config.nameLeft}%; font-size: ${config.nameSize}px; font-weight: 800; transform: translate(-50%, -50%); white-space: nowrap; background: rgba(255,255,240,0.7); padding: 2px 8px; border-radius: 40px;">${escapeHtml(participant.name)}</div>
+                            ${config.showInst ? `<div class="print-text" style="top: ${config.instTop}%; left: ${config.instLeft}%; font-size: ${config.instSize}px; transform: translate(-50%, -50%); font-weight: 500; background: rgba(255,255,245,0.6); padding: 2px 6px; border-radius: 20px;">${escapeHtml(participant.institution)}</div>` : ''}
+                            ${config.showQR ? `<div id="qr_${participant.uid.replace(/[^a-zA-Z0-9]/g, '_')}" class="qr-wrapper" style="top: ${config.qrTop}%; left: ${config.qrLeft}%; transform: translate(-50%, -50%); width: ${config.qrSize}px; height: ${config.qrSize}px;"></div>` : ''}
+                        </div>
+                    `;
+                } else {
+                    // empty placeholder to keep grid alignment
+                    pageHTML += `<div class="id-slot" style="background: #f1f5f9; border: 1px dashed #ccc;"></div>`;
+                }
+            }
+            pageHTML += `</div>`;
+            bulkContainer.innerHTML += pageHTML;
+        }
+
+        // ---- generate QR codes after DOM injection ----
+        if (config.showQR) {
+            // slight delay to ensure divs exist
+            await new Promise(resolve => setTimeout(resolve, 80));
+            for (let p of selectedParticipants) {
+                const qrDivId = `qr_${p.uid.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                const qrElement = document.getElementById(qrDivId);
+                if (qrElement) {
+                    // clear previous content if any
+                    qrElement.innerHTML = '';
+                    try {
+                        new QRCode(qrElement, {
+                            text: `TRAIN2026:${p.name} (${p.cluster})`,
+                            width: parseInt(config.qrSize),
+                            height: parseInt(config.qrSize),
+                            colorDark: "#000000",
+                            colorLight: "#ffffff",
+                            correctLevel: QRCode.CorrectLevel.M
+                        });
+                    } catch(e) { console.warn("QR fail", e); qrElement.innerText = "QR error"; }
+                }
             }
         }
 
-        window.onload = fetchLiveData;
-    </script>
+        // final output based on mode
+        if (mode === 'print') {
+            setTimeout(() => {
+                window.print();
+                // after print, we do NOT hide bulk container immediately, but after print dialog close -> optional delay
+                setTimeout(() => {
+                    bulkContainer.style.display = 'none';
+                }, 1000);
+            }, 300);
+        } 
+        else if (mode === 'pdf') {
+            const opt = {
+                margin: 0,
+                filename: `Teachers_IDs_${new Date().toISOString().slice(0,19)}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false },
+                jsPDF: { unit: 'cm', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(bulkContainer).save().then(() => {
+                bulkContainer.style.display = 'none';
+            }).catch(err => {
+                console.error("PDF error", err);
+                alert("PDF generation error, ensure images are fully loaded.");
+                bulkContainer.style.display = 'none';
+            });
+        }
+    }
+
+    // helper to rerender after any change (global select/deselect update)
+    window.toggleSelect = toggleSelect;
+    window.setFilterBatch = setFilterBatch;
+    window.fetchLiveData = fetchLiveData;
+    window.handleTemplate = handleTemplate;
+    window.generateContent = generateContent;
+    window.render = render;
+
+    // init load data + background check
+    window.onload = () => {
+        fetchLiveData();
+        // set default background message
+        document.getElementById('tplStatus').innerHTML = "📂 Click to upload ID background";
+        // remove any stray selected
+        selectedIds.clear();
+        updatePrintButtonText();
+    };
+</script>
 </body>
 </html>
